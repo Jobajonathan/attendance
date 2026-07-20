@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ session.name }}{% endblock %}
+{% block content %}
+  <h1>{{ session.name }}</h1>
+  <p>{{ session.starts_at }} &ndash; {{ session.ends_at }} &middot; {{ "Closed" if session.is_closed else "Open" }}</p>
+
+  {% if not session.is_closed %}
+    <h2>Check-in</h2>
+    <img src="{{ url_for('session_qr', session_id=session.id) }}" alt="Check-in QR code" width="200">
+    <p>Or share this link: <a href="{{ checkin_url }}">{{ checkin_url }}</a></p>
+    <form method="post" action="{{ url_for('close_session', session_id=session.id) }}"
+          onsubmit="return confirm('Close this session? Students who have not checked in will be marked absent.');">
+      <button type="submit">Close session &amp; mark no-shows absent</button>
+    </form>
+  {% endif %}
+
+  <h2>Roster</h2>
+  <table>
+    <thead><tr><th>Student ID</th><th>Name</th><th>Status</th><th>Checked in at</th></tr></thead>
+    <tbody>
+      {% for student in roster %}
+      {% set a = checked_in.get(student.id) %}
+      <tr>
+        <td>{{ student.student_id }}</td>
+        <td>{{ student.name }}</td>
+        <td>{{ a.status if a else ("absent" if session.is_closed else "-") }}</td>
+        <td>{{ a.checked_in_at if a else "" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}New session{% endblock %}
+{% block content %}
+  <h1>New session</h1>
+  <form method="post">
+    <label>Name <input type="text" name="name" required></label><br>
+    <label>Starts at <input type="datetime-local" name="starts_at" required></label><br>
+    <label>Ends at <input type="datetime-local" name="ends_at" required></label><br>
+    <button type="submit">Create</button>
+  </form>
+{% endblock %}

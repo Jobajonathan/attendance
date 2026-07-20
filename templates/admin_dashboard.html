@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Sessions{% endblock %}
+{% block content %}
+  <h1>Sessions</h1>
+  <p><a href="{{ url_for('new_session') }}">+ New session</a></p>
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Starts</th><th>Ends</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      {% for session in sessions %}
+      <tr>
+        <td><a href="{{ url_for('session_detail', session_id=session.id) }}">{{ session.name }}</a></td>
+        <td>{{ session.starts_at }}</td>
+        <td>{{ session.ends_at }}</td>
+        <td>{{ "Closed" if session.is_closed else "Open" }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4">No sessions yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

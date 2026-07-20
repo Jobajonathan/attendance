@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Roster{% endblock %}
+{% block content %}
+  <h1>Roster</h1>
+  <form method="post">
+    <label>Student ID <input type="text" name="student_id" required></label>
+    <label>Name <input type="text" name="name" required></label>
+    <label>Email <input type="email" name="email"></label>
+    <button type="submit">Add</button>
+  </form>
+  <table>
+    <thead><tr><th>Student ID</th><th>Name</th><th>Email</th></tr></thead>
+    <tbody>
+      {% for student in roster %}
+      <tr><td>{{ student.student_id }}</td><td>{{ student.name }}</td><td>{{ student.email }}</td></tr>
+      {% else %}
+      <tr><td colspan="3">No students yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Attendance{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav>
+    <a href="{{ url_for('admin_dashboard') }}">Sessions</a>
+    <a href="{{ url_for('students') }}">Roster</a>
+    <a href="{{ url_for('report') }}">Absenteeism report</a>
+  </nav>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flashes">
+        {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
