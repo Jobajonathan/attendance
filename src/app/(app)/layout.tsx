@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireProfile } from "@/lib/current-profile";
 import { ROLE_LABELS, isLeadershipRole } from "@/lib/roles";
 import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireProfile();
@@ -9,7 +10,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen flex-1 flex-col bg-neutral-50">
-      <header className="border-b border-neutral-200 bg-white">
+      <header className="border-b border-neutral-200 bg-white dark:bg-neutral-100">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-6">
             <Logo />
@@ -33,6 +34,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </nav>
           </div>
           <div className="flex items-center gap-3 text-sm text-neutral-600">
+            <ThemeToggle />
             <span>
               {profile.full_name} &middot; {ROLE_LABELS[profile.role]}
             </span>

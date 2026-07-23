@@ -4,6 +4,7 @@ import { homePathForRole } from "@/lib/roles";
 import { Logo } from "@/components/logo";
 import { LinkButton } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -38,15 +39,18 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-screen flex-1 flex-col bg-neutral-50">
-      <header className="border-b border-neutral-200 bg-white">
+      <header className="border-b border-neutral-200 bg-white dark:bg-neutral-100">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <Logo />
             <span className="text-sm text-neutral-500">Light Nation Protocol Department</span>
           </div>
-          <LinkButton href="/login" variant="secondary" size="sm">
-            Admin
-          </LinkButton>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <LinkButton href="/login" variant="secondary" size="sm">
+              Admin
+            </LinkButton>
+          </div>
         </div>
       </header>
 

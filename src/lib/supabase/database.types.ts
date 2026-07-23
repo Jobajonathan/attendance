@@ -405,7 +405,12 @@ export type Database = {
         | "minister_in_charge"
         | "super_admin"
       geofence_outcome: "match" | "mismatch" | "unknown"
-      member_status_manual: "active" | "transferred" | "inactive"
+      member_status_manual:
+        | "active"
+        | "relocated"
+        | "suspended"
+        | "out_of_town"
+        | "other"
       submission_status: "present" | "absent" | "excused"
     }
     CompositeTypes: {
@@ -544,7 +549,13 @@ export const Constants = {
         "super_admin",
       ],
       geofence_outcome: ["match", "mismatch", "unknown"],
-      member_status_manual: ["active", "transferred", "inactive"],
+      member_status_manual: [
+        "active",
+        "relocated",
+        "suspended",
+        "out_of_town",
+        "other",
+      ],
       submission_status: ["present", "absent", "excused"],
     },
   },
