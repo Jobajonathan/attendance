@@ -46,8 +46,8 @@ export function parseCsv(text: string): string[][] {
   return rows;
 }
 
-export function parseCsvToObjects(text: string): Record<string, string>[] {
-  const rows = parseCsv(text);
+/** Shared by both the CSV and Excel import paths once each has produced a plain row matrix. */
+export function rowsToObjects(rows: string[][]): Record<string, string>[] {
   if (rows.length === 0) return [];
   const headers = rows[0].map((h) => h.trim().toLowerCase());
   return rows.slice(1).map((row) => {
@@ -57,4 +57,8 @@ export function parseCsvToObjects(text: string): Record<string, string>[] {
     });
     return obj;
   });
+}
+
+export function parseCsvToObjects(text: string): Record<string, string>[] {
+  return rowsToObjects(parseCsv(text));
 }

@@ -39,7 +39,7 @@ export default async function DashboardPage() {
     { data: followUpRows },
   ] = await Promise.all([
     supabase.from("activities").select("id").eq("type", "attendance").eq("scheduled_date", todayStr),
-    supabase.from("members").select("*", { count: "exact", head: true }).eq("status_manual", "inactive"),
+    supabase.from("members").select("*", { count: "exact", head: true }).eq("status_manual", "suspended"),
     supabase.from("members").select("id, name, birthday, anniversary_date, status_manual"),
     supabase.rpc("get_weekly_engagement_components", { p_weeks: 12 }),
     supabase.rpc("get_needs_follow_up", { p_threshold: 2 }),

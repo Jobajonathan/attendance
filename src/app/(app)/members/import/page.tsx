@@ -11,9 +11,9 @@ export default function ImportMembersPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="font-heading text-2xl font-semibold text-neutral-900">Import from Google Sheets</h1>
+      <h1 className="font-heading text-2xl font-semibold text-neutral-900">Import Members</h1>
       <p className="mt-2 text-sm text-neutral-600">
-        Export the department&apos;s member sheet as CSV with columns{" "}
+        Upload a CSV or Excel (.xlsx) file with columns{" "}
         <code className="rounded bg-neutral-100 px-1">
           name, phone_number, occupation, gender, join_date, birthday, anniversary_date,
           residential_address, join_reason
@@ -21,14 +21,18 @@ export default function ImportMembersPage() {
         (name and phone_number required, the rest optional). Dates as YYYY-MM-DD; birthday also
         accepts M/D or MM/DD if you don&apos;t have a year on file. Rows missing a name are
         skipped and reported below rather than blocking the rest of the import; rows matching an
-        existing member by name are held for manual review rather than created automatically.
+        existing member by name are held for manual review rather than created automatically.{" "}
+        <a href="/member-import-sample.xlsx" download className="text-brand underline">
+          Download sample template
+        </a>
+        .
       </p>
 
       <form action={formAction} className="mt-6 space-y-4">
         <input
           type="file"
           name="file"
-          accept=".csv"
+          accept=".csv,.xlsx"
           required
           className="block text-sm text-neutral-700 file:mr-3 file:rounded-md file:border-0 file:bg-brand file:px-3 file:py-2 file:text-sm file:text-brand-foreground"
         />
