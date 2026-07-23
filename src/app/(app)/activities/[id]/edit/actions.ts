@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
 import { datetimeLocalToUtcIso } from "@/lib/timezone";
+import { canManageOperations } from "@/lib/roles";
 
 export async function updateActivity(
   activityId: string,
@@ -11,8 +12,8 @@ export async function updateActivity(
   formData: FormData,
 ) {
   const profile = await requireProfile();
-  if (profile.role !== "administrative_officer") {
-    return { error: "Only the Administrative Officer can edit activities." };
+  if (!canManageOperations(profile.role)) {
+    return { error: "Only the Administrative Officer or a super admin can edit activities." };
   }
 
   const title = String(formData.get("title") ?? "").trim();

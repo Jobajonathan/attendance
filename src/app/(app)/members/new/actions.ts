@@ -3,11 +3,12 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
+import { canManageOperations } from "@/lib/roles";
 
 export async function createMember(_prevState: { error: string } | null, formData: FormData) {
   const profile = await requireProfile();
-  if (profile.role !== "administrative_officer") {
-    return { error: "Only the Administrative Officer can add members." };
+  if (!canManageOperations(profile.role)) {
+    return { error: "Only the Administrative Officer or a super admin can add members." };
   }
 
   const name = String(formData.get("name") ?? "").trim();

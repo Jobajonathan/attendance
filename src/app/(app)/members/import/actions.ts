@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
 import { parseCsvToObjects } from "@/lib/csv";
 import { parseBirthdayInput } from "@/lib/birthday";
+import { canManageOperations } from "@/lib/roles";
 import type { TablesInsert } from "@/lib/supabase/database.types";
 
 type ImportResult = {
@@ -17,8 +18,8 @@ const normalizeName = (name: string) => name.trim().toLowerCase().replace(/\s+/g
 
 export async function importMembers(_prevState: ImportResult | null, formData: FormData): Promise<ImportResult> {
   const profile = await requireProfile();
-  if (profile.role !== "administrative_officer") {
-    return { error: "Only the Administrative Officer can import members." };
+  if (!canManageOperations(profile.role)) {
+    return { error: "Only the Administrative Officer or a super admin can import members." };
   }
 
   const file = formData.get("file");

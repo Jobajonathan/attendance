@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
+import { canManageOperations, isLeadershipRole } from "@/lib/roles";
 import { CloseActivityButton, ReopenActivityButton } from "./activity-actions";
 import { Card } from "@/components/ui/card";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
@@ -73,9 +74,9 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
   const origin = `${headerList.get("x-forwarded-proto") ?? "https"}://${headerList.get("host")}`;
   const isReview = activity.type === "message_review";
   const submissionUrl = `${origin}/${isReview ? "review" : "checkin"}/${activity.link_token}`;
-  const canClose = ["administrative_officer", "head_of_department"].includes(profile.role);
-  const canReopen = profile.role === "head_of_department";
-  const canEdit = profile.role === "administrative_officer";
+  const canClose = canManageOperations(profile.role) || isLeadershipRole(profile.role);
+  const canReopen = isLeadershipRole(profile.role);
+  const canEdit = canManageOperations(profile.role);
 
   const presentCount = submissions?.filter((s) => s.status === "present").length ?? 0;
   const absentCount = submissions?.filter((s) => s.status === "absent").length ?? 0;

@@ -3,10 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
+import { canManageOperations, isLeadershipRole } from "@/lib/roles";
 
 export async function closeActivity(activityId: string) {
   const profile = await requireProfile();
-  if (!["administrative_officer", "head_of_department"].includes(profile.role)) {
+  if (!canManageOperations(profile.role) && !isLeadershipRole(profile.role)) {
     return { error: "You don't have permission to close this activity." };
   }
 
@@ -27,8 +28,8 @@ export async function reopenActivity(
   formData: FormData,
 ) {
   const profile = await requireProfile();
-  if (profile.role !== "head_of_department") {
-    return { error: "Only the Head of Department can reopen a closed activity." };
+  if (!isLeadershipRole(profile.role)) {
+    return { error: "Only leadership can reopen a closed activity." };
   }
 
   const reason = String(formData.get("reason") ?? "").trim() || undefined;

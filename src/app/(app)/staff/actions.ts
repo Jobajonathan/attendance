@@ -41,6 +41,12 @@ export async function inviteStaff(_prevState: { error: string } | null, formData
   if (!APP_ROLES.includes(role as AppRole)) {
     return { error: "Choose a valid role." };
   }
+  // Otherwise any leadership account could hand out the top role via this
+  // same dropdown, since everything above this line is gated only by
+  // isLeadershipRole() — which now includes super_admin itself.
+  if (role === "super_admin" && profile.role !== "super_admin") {
+    return { error: "Only a super admin can grant super admin access." };
+  }
 
   const admin = createAdminClient();
   const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
@@ -80,6 +86,9 @@ export async function updateStaffRole(
   const role = String(formData.get("role") ?? "");
   if (!APP_ROLES.includes(role as AppRole)) {
     return { error: "Choose a valid role." };
+  }
+  if (role === "super_admin" && profile.role !== "super_admin") {
+    return { error: "Only a super admin can grant super admin access." };
   }
 
   const admin = createAdminClient();

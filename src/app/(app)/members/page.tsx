@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
 import { deriveMemberStatus, MEMBER_STATUS_LABELS } from "@/lib/member-status";
+import { canManageOperations } from "@/lib/roles";
 import { PageHeader } from "@/components/ui/page-header";
 import { LinkButton } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -30,7 +31,7 @@ export default async function MembersPage({
   }
   const { data: members, error } = await query;
 
-  const canManage = profile.role === "administrative_officer";
+  const canManage = canManageOperations(profile.role);
 
   return (
     <div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
+import { canManageOperations } from "@/lib/roles";
 import { serverNow } from "@/lib/server-now";
 import { PageHeader } from "@/components/ui/page-header";
 import { LinkButton } from "@/components/ui/button";
@@ -34,7 +35,7 @@ export default async function ActivitiesPage() {
     .select("*")
     .order("opens_at", { ascending: false });
 
-  const canCreate = profile.role === "administrative_officer";
+  const canCreate = canManageOperations(profile.role);
   const now = serverNow();
 
   return (
