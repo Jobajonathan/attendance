@@ -8,6 +8,7 @@ import { LinkButton } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
+import type { Enums } from "@/lib/supabase/database.types";
 
 const STATUS_TONE: Record<string, BadgeTone> = {
   scheduled: "neutral",
@@ -15,14 +16,20 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   closed: "neutral",
 };
 
-const TYPE_LABELS: Record<string, string> = {
+const TYPE_LABELS: Record<Enums<"activity_type">, string> = {
   attendance: "Attendance",
   message_review: "Message Review",
 };
 
-export default async function ActivitiesPage() {
+export default async function ActivitiesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
   const profile = await requireProfile();
   const supabase = await createClient();
+  const { tab } = await searchParams;
+  const activeTab: Enums<"activity_type"> = tab === "message_review" ? "message_review" : "attendance";
 
   // Vercel Hobby's cron granularity is daily at best (see vercel.json), so
   // opportunistically re-run the same time-based transition on every load of
@@ -33,6 +40,7 @@ export default async function ActivitiesPage() {
   const { data: activities, error } = await supabase
     .from("activities")
     .select("*")
+    .eq("type", activeTab)
     .order("opens_at", { ascending: false });
 
   const canCreate = canManageOperations(profile.role);
@@ -42,8 +50,27 @@ export default async function ActivitiesPage() {
     <div>
       <PageHeader
         title="Activities"
-        action={canCreate && <LinkButton href="/activities/new" size="sm">+ New activity</LinkButton>}
+        action={
+          canCreate && (
+            <LinkButton href={`/activities/new?type=${activeTab}`} size="sm">
+              + New {TYPE_LABELS[activeTab]} Activity
+            </LinkButton>
+          )
+        }
       />
+
+      <div className="mt-4 flex gap-2">
+        {(["attendance", "message_review"] as Enums<"activity_type">[]).map((t) => (
+          <LinkButton
+            key={t}
+            href={`/activities?tab=${t}`}
+            size="sm"
+            variant={activeTab === t ? "primary" : "secondary"}
+          >
+            {TYPE_LABELS[t]}
+          </LinkButton>
+        ))}
+      </div>
 
       {error && (
         <Alert tone="error" className="mt-4">
@@ -56,7 +83,6 @@ export default async function ActivitiesPage() {
           <thead className="bg-neutral-50 text-left text-xs font-medium uppercase tracking-wide text-neutral-500">
             <tr>
               <th className="px-4 py-2">Title</th>
-              <th className="px-4 py-2">Type</th>
               <th className="px-4 py-2">Scheduled</th>
               <th className="px-4 py-2">Opens</th>
               <th className="px-4 py-2">Closes</th>
@@ -80,8 +106,12 @@ export default async function ActivitiesPage() {
                         Backfilled
                       </Badge>
                     )}
+                    {activity.service_template_id && (
+                      <Badge tone="neutral" className="ml-2">
+                        Recurring
+                      </Badge>
+                    )}
                   </td>
-                  <td className="px-4 py-2 text-neutral-500">{TYPE_LABELS[activity.type]}</td>
                   <td className="px-4 py-2 text-neutral-500">{activity.scheduled_date}</td>
                   <td className="px-4 py-2 text-neutral-500">{new Date(activity.opens_at).toLocaleString()}</td>
                   <td className="px-4 py-2 text-neutral-500">{new Date(activity.closes_at).toLocaleString()}</td>
@@ -98,8 +128,8 @@ export default async function ActivitiesPage() {
             })}
             {activities?.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-neutral-400">
-                  No activities yet.
+                <td colSpan={5} className="px-4 py-6 text-center text-neutral-400">
+                  No {TYPE_LABELS[activeTab].toLowerCase()} activities yet.
                 </td>
               </tr>
             )}

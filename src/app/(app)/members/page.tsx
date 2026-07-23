@@ -11,9 +11,10 @@ import { Alert } from "@/components/ui/alert";
 
 const MEMBER_STATUS_TONE: Record<string, BadgeTone> = {
   active: "success",
-  on_leave: "warning",
-  inactive: "neutral",
-  transferred: "neutral",
+  suspended: "danger",
+  relocated: "neutral",
+  out_of_town: "warning",
+  other: "neutral",
 };
 
 export default async function MembersPage({
@@ -32,6 +33,12 @@ export default async function MembersPage({
   const { data: members, error } = await query;
 
   const canManage = canManageOperations(profile.role);
+  const { count: pendingRequestCount } = canManage
+    ? await supabase
+        .from("member_registration_requests")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending")
+    : { count: null };
 
   return (
     <div>
@@ -40,8 +47,11 @@ export default async function MembersPage({
         action={
           canManage && (
             <div className="flex gap-2">
+              <LinkButton href="/members/requests" variant="secondary" size="sm">
+                Registration Requests{pendingRequestCount ? ` (${pendingRequestCount})` : ""}
+              </LinkButton>
               <LinkButton href="/members/import" variant="secondary" size="sm">
-                Import from Google Sheets
+                Import Members
               </LinkButton>
               <LinkButton href="/members/new" size="sm">
                 Add member
@@ -71,6 +81,7 @@ export default async function MembersPage({
         <table className="min-w-full divide-y divide-neutral-200 text-sm">
           <thead className="bg-neutral-50 text-left text-xs font-medium uppercase tracking-wide text-neutral-500">
             <tr>
+              <th className="px-4 py-2">S/N</th>
               <th className="px-4 py-2">Name</th>
               <th className="px-4 py-2">Joined</th>
               <th className="px-4 py-2">Status</th>
@@ -78,13 +89,15 @@ export default async function MembersPage({
               <th className="px-4 py-2">Occupation</th>
               <th className="px-4 py-2">Marital Status</th>
               <th className="px-4 py-2">Residential Address</th>
+              {canManage && <th className="px-4 py-2" />}
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-100">
-            {members?.map((member) => {
+            {members?.map((member, index) => {
               const status = deriveMemberStatus(member);
               return (
                 <tr key={member.id} className="hover:bg-neutral-50">
+                  <td className="px-4 py-2 text-neutral-500">{index + 1}</td>
                   <td className="px-4 py-2">
                     <Link href={`/members/${member.id}`} className="font-medium text-neutral-900 hover:text-brand">
                       {member.name}
@@ -98,12 +111,19 @@ export default async function MembersPage({
                   <td className="px-4 py-2 text-neutral-500">{member.occupation ?? "—"}</td>
                   <td className="px-4 py-2 text-neutral-500 capitalize">{member.marital_status ?? "—"}</td>
                   <td className="px-4 py-2 text-neutral-500">{member.residential_address ?? "—"}</td>
+                  {canManage && (
+                    <td className="px-4 py-2">
+                      <LinkButton href={`/members/${member.id}`} variant="secondary" size="sm">
+                        Edit
+                      </LinkButton>
+                    </td>
+                  )}
                 </tr>
               );
             })}
             {members?.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-neutral-400">
+                <td colSpan={canManage ? 9 : 8} className="px-4 py-6 text-center text-neutral-400">
                   No members found.
                 </td>
               </tr>

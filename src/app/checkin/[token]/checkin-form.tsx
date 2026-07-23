@@ -38,7 +38,7 @@ export function CheckinForm({ token, members }: { token: string; members: Member
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!selected || !keyword.trim()) return;
+    if (!selected || (!noLocation && !keyword.trim())) return;
 
     setSubmitting(true);
     setResult(null);
@@ -162,25 +162,21 @@ export function CheckinForm({ token, members }: { token: string; members: Member
         )}
       </div>
 
-      <div className="space-y-1">
-        <label htmlFor="keyword" className="text-sm font-medium text-neutral-700">
-          Session keyword
-        </label>
-        <input
-          id="keyword"
-          type="text"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          required
-          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm uppercase focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-        />
-        {noLocation && (
-          <p className="text-xs text-neutral-500">
-            Use the alternate keyword your Administrative Officer gave you for this mode — it&apos;s
-            different from the regular check-in keyword.
-          </p>
-        )}
-      </div>
+      {!noLocation && (
+        <div className="space-y-1">
+          <label htmlFor="keyword" className="text-sm font-medium text-neutral-700">
+            Session keyword
+          </label>
+          <input
+            id="keyword"
+            type="text"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            required
+            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm uppercase focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+          />
+        </div>
+      )}
 
       <label className="flex items-start gap-2 text-sm text-neutral-700">
         <input
@@ -194,13 +190,13 @@ export function CheckinForm({ token, members }: { token: string; members: Member
 
       <p className="text-xs text-neutral-500">
         {noLocation
-          ? "Location won't be requested for this check-in."
+          ? "Location won't be requested — check with your Administrative Officer to confirm your check-in."
           : "You'll be asked to share your location — this is required to check in."}
       </p>
 
       {locationError && <Alert tone="error">{locationError}</Alert>}
 
-      <Button type="submit" disabled={!selected || !keyword.trim() || submitting} fullWidth>
+      <Button type="submit" disabled={!selected || (!noLocation && !keyword.trim()) || submitting} fullWidth>
         {submitting ? "Checking in..." : "Check in"}
       </Button>
     </form>

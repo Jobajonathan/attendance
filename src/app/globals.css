@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #fffbf8;
   --foreground: #2b211c;
@@ -34,6 +36,32 @@
   --color-neutral-900: #2b211c;
 
   --font-heading: Georgia, "Times New Roman", serif;
+}
+
+/* Dark theme: same warm hue family as light, just inverted — a near-black
+   warm background/neutral-50 and warm-cream text/neutral-900, rather than a
+   cool gray dark mode. Brand orange is left unchanged; it reads fine on a
+   dark background as-is. Tailwind v4's @theme inline block resolves these
+   custom properties at paint time, so every existing neutral-scale utility
+   class automatically follows this override with no component changes —
+   only the handful of literal bg-white spots (Card and two page headers)
+   needed an explicit dark variant, since Tailwind's built-in white token is
+   intentionally left alone (redefining it globally would also flip
+   text-white on colored buttons, breaking their contrast). */
+.dark {
+  --background: #17120f;
+  --foreground: #f3e9e0;
+
+  --color-neutral-50: #1c1613;
+  --color-neutral-100: #241d18;
+  --color-neutral-200: #322820;
+  --color-neutral-300: #44362b;
+  --color-neutral-400: #5c4a3a;
+  --color-neutral-500: #7c6752;
+  --color-neutral-600: #9c8874;
+  --color-neutral-700: #bfad9b;
+  --color-neutral-800: #ddd0c2;
+  --color-neutral-900: #f3e9e0;
 }
 
 @theme inline {
