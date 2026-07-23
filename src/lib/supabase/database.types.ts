@@ -295,6 +295,25 @@ export type Database = {
           title: string
         }[]
       }
+      get_open_review_link: {
+        Args: never
+        Returns: {
+          link_token: string
+          title: string
+        }[]
+      }
+      get_review_activity: {
+        Args: { p_link_token: string }
+        Returns: {
+          closes_at: string
+          id: string
+          opens_at: string
+          scheduled_date: string
+          status: Database["public"]["Enums"]["activity_status"]
+          title: string
+          type: Database["public"]["Enums"]["activity_type"]
+        }[]
+      }
       list_checkin_members: {
         Args: { p_link_token: string }
         Returns: {
@@ -319,6 +338,21 @@ export type Database = {
         }
         Returns: {
           geofence_outcome: Database["public"]["Enums"]["geofence_outcome"]
+          outcome: string
+          submission_status: Database["public"]["Enums"]["submission_status"]
+          submitted_at: string
+        }[]
+      }
+      submit_message_review: {
+        Args: {
+          p_confirmed: boolean
+          p_keyword: string
+          p_link_token: string
+          p_member_id: string
+          p_rating: number
+          p_reflection: string
+        }
+        Returns: {
           outcome: string
           submission_status: Database["public"]["Enums"]["submission_status"]
           submitted_at: string

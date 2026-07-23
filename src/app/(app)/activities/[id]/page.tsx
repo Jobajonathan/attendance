@@ -24,6 +24,26 @@ const GEOFENCE_TONE: Record<string, BadgeTone> = {
   unknown: "neutral",
 };
 
+const TYPE_LABELS: Record<string, string> = {
+  attendance: "Attendance",
+  message_review: "Message Review",
+};
+
+type ReviewPayload = { q1: number; q2: string; q3: boolean };
+
+function asReviewPayload(payload: unknown): ReviewPayload | null {
+  if (
+    payload &&
+    typeof payload === "object" &&
+    "q1" in payload &&
+    "q2" in payload &&
+    "q3" in payload
+  ) {
+    return payload as ReviewPayload;
+  }
+  return null;
+}
+
 export default async function ActivityDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const profile = await requireProfile();
@@ -50,7 +70,8 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
 
   const headerList = await headers();
   const origin = `${headerList.get("x-forwarded-proto") ?? "https"}://${headerList.get("host")}`;
-  const checkinUrl = `${origin}/checkin/${activity.link_token}`;
+  const isReview = activity.type === "message_review";
+  const submissionUrl = `${origin}/${isReview ? "review" : "checkin"}/${activity.link_token}`;
   const canClose = ["administrative_officer", "head_of_department"].includes(profile.role);
   const canReopen = profile.role === "head_of_department";
 
@@ -66,14 +87,17 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
           {new Date(activity.closes_at).toLocaleString()}
         </span>
         <Badge tone={ACTIVITY_STATUS_TONE[activity.status]}>{activity.status}</Badge>
+        <Badge tone="neutral">{TYPE_LABELS[activity.type]}</Badge>
         {activity.is_backfilled && <Badge tone="warning">Backfilled</Badge>}
       </p>
 
       {activity.status !== "closed" && (
         <Card className="mt-4 p-4">
-          <p className="text-sm font-medium text-neutral-700">Check-in keyword: {activity.keyword}</p>
+          <p className="text-sm font-medium text-neutral-700">
+            {isReview ? "Review" : "Check-in"} keyword: {activity.keyword}
+          </p>
           <p className="mt-1 break-all text-sm text-neutral-600">
-            Link: <a href={checkinUrl} className="text-brand underline">{checkinUrl}</a>
+            Link: <a href={submissionUrl} className="text-brand underline">{submissionUrl}</a>
           </p>
         </Card>
       )}
@@ -93,26 +117,53 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
               <th className="px-4 py-2">Member</th>
               <th className="px-4 py-2">Status</th>
               <th className="px-4 py-2">Submitted</th>
-              <th className="px-4 py-2">Geofence</th>
+              {isReview ? (
+                <>
+                  <th className="px-4 py-2">Rating</th>
+                  <th className="px-4 py-2">Reflection</th>
+                  <th className="px-4 py-2">Confirmed</th>
+                </>
+              ) : (
+                <th className="px-4 py-2">Geofence</th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-100">
-            {submissions?.map((s) => (
-              <tr key={s.id}>
-                <td className="px-4 py-2 text-neutral-900">{s.members?.name}</td>
-                <td className="px-4 py-2">
-                  <Badge tone={SUBMISSION_STATUS_TONE[s.status]}>{s.status}</Badge>
-                </td>
-                <td className="px-4 py-2 text-neutral-500">{new Date(s.submitted_at).toLocaleString()}</td>
-                <td className="px-4 py-2">
-                  {s.geofence_outcome && <Badge tone={GEOFENCE_TONE[s.geofence_outcome]}>{s.geofence_outcome}</Badge>}
-                </td>
-              </tr>
-            ))}
+            {submissions?.map((s) => {
+              const review = isReview ? asReviewPayload(s.response_payload) : null;
+              return (
+                <tr key={s.id}>
+                  <td className="px-4 py-2 text-neutral-900">{s.members?.name}</td>
+                  <td className="px-4 py-2">
+                    <Badge tone={SUBMISSION_STATUS_TONE[s.status]}>{s.status}</Badge>
+                  </td>
+                  <td className="px-4 py-2 text-neutral-500">{new Date(s.submitted_at).toLocaleString()}</td>
+                  {isReview ? (
+                    <>
+                      <td className="px-4 py-2 text-neutral-500">{review ? `${review.q1}/5` : "—"}</td>
+                      <td className="max-w-xs px-4 py-2 text-neutral-500">{review?.q2 ?? "—"}</td>
+                      <td className="px-4 py-2 text-neutral-500">{review ? (review.q3 ? "Yes" : "No") : "—"}</td>
+                    </>
+                  ) : (
+                    <td className="px-4 py-2">
+                      {s.geofence_outcome && (
+                        <Badge tone={GEOFENCE_TONE[s.geofence_outcome]}>{s.geofence_outcome}</Badge>
+                      )}
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
             {(!submissions || submissions.length === 0) && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-neutral-400">
-                  {activity.status === "closed" ? "No one checked in." : "No check-ins yet."}
+                <td colSpan={isReview ? 6 : 4} className="px-4 py-6 text-center text-neutral-400">
+                  {activity.status === "closed"
+                    ? isReview
+                      ? "No reviews were submitted."
+                      : "No one checked in."
+                    : isReview
+                      ? "No reviews yet."
+                      : "No check-ins yet."}
                 </td>
               </tr>
             )}
