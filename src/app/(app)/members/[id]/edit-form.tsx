@@ -29,6 +29,13 @@ export default function EditMemberForm({
         defaultValue={member.phone_number ?? ""}
         disabled={!canManage}
       />
+      <Field
+        label="Occupation"
+        name="occupation"
+        type="text"
+        defaultValue={member.occupation ?? ""}
+        disabled={!canManage}
+      />
       <Field label="Gender" name="gender" type="text" defaultValue={member.gender ?? ""} disabled={!canManage} />
       <Field
         label="Birthday"
@@ -44,6 +51,34 @@ export default function EditMemberForm({
         defaultValue={member.anniversary_date ?? ""}
         disabled={!canManage}
       />
+
+      <div className="space-y-1">
+        <label htmlFor="residential_address" className="text-sm font-medium text-neutral-700">
+          Residential address
+        </label>
+        <textarea
+          id="residential_address"
+          name="residential_address"
+          rows={2}
+          defaultValue={member.residential_address ?? ""}
+          disabled={!canManage}
+          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand disabled:bg-neutral-100"
+        />
+      </div>
+
+      <div className="space-y-1">
+        <label htmlFor="join_reason" className="text-sm font-medium text-neutral-700">
+          Reason for joining the department
+        </label>
+        <textarea
+          id="join_reason"
+          name="join_reason"
+          rows={2}
+          defaultValue={member.join_reason ?? ""}
+          disabled={!canManage}
+          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand disabled:bg-neutral-100"
+        />
+      </div>
 
       <div className="space-y-1">
         <label htmlFor="status_manual" className="text-sm font-medium text-neutral-700">

@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
 import { parseCsvToObjects } from "@/lib/csv";
+import { parseBirthdayInput } from "@/lib/birthday";
 import type { TablesInsert } from "@/lib/supabase/database.types";
 
 type ImportResult = {
@@ -86,10 +87,13 @@ export async function importMembers(_prevState: ImportResult | null, formData: F
     toInsert.push({
       name,
       phone_number: phone,
+      occupation: raw.occupation?.trim() || null,
       gender: raw.gender?.trim() || null,
       join_date: raw.join_date?.trim() || undefined,
-      birthday: raw.birthday?.trim() || null,
+      birthday: parseBirthdayInput(raw.birthday ?? ""),
       anniversary_date: raw.anniversary_date?.trim() || null,
+      residential_address: raw.residential_address?.trim() || null,
+      join_reason: raw.join_reason?.trim() || null,
       created_by: profile.id,
     });
   });
