@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
 import { parseCsvToObjects } from "@/lib/csv";
+import { parseXlsxToObjects } from "@/lib/xlsx-import";
 import { parseBirthdayInput } from "@/lib/birthday";
 import { canManageOperations } from "@/lib/roles";
 import type { TablesInsert } from "@/lib/supabase/database.types";
@@ -24,11 +25,13 @@ export async function importMembers(_prevState: ImportResult | null, formData: F
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
-    return { error: "Choose a CSV file exported from the department's Google Sheet." };
+    return { error: "Choose a CSV or Excel (.xlsx) file exported from the department's sheet." };
   }
 
-  const text = await file.text();
-  const rows = parseCsvToObjects(text);
+  const isExcel = file.name.toLowerCase().endsWith(".xlsx");
+  const rows = isExcel
+    ? await parseXlsxToObjects(await file.arrayBuffer())
+    : parseCsvToObjects(await file.text());
   if (rows.length === 0) {
     return { error: "The file has no data rows." };
   }
