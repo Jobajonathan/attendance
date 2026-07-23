@@ -29,6 +29,7 @@ export type Database = {
           location_lng: number | null
           opens_at: string
           scheduled_date: string
+          service_template_id: string | null
           status: Database["public"]["Enums"]["activity_status"]
           title: string
           type: Database["public"]["Enums"]["activity_type"]
@@ -47,6 +48,7 @@ export type Database = {
           location_lng?: number | null
           opens_at: string
           scheduled_date: string
+          service_template_id?: string | null
           status?: Database["public"]["Enums"]["activity_status"]
           title: string
           type: Database["public"]["Enums"]["activity_type"]
@@ -65,6 +67,7 @@ export type Database = {
           location_lng?: number | null
           opens_at?: string
           scheduled_date?: string
+          service_template_id?: string | null
           status?: Database["public"]["Enums"]["activity_status"]
           title?: string
           type?: Database["public"]["Enums"]["activity_type"]
@@ -75,6 +78,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_service_template_id_fkey"
+            columns: ["service_template_id"]
+            isOneToOne: false
+            referencedRelation: "service_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -221,6 +231,53 @@ export type Database = {
         }
         Relationships: []
       }
+      service_templates: {
+        Row: {
+          activity_type: Database["public"]["Enums"]["activity_type"]
+          close_day_of_week: number
+          close_time: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          name: string
+          open_day_of_week: number
+          open_time: string
+        }
+        Insert: {
+          activity_type: Database["public"]["Enums"]["activity_type"]
+          close_day_of_week: number
+          close_time: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          open_day_of_week: number
+          open_time: string
+        }
+        Update: {
+          activity_type?: Database["public"]["Enums"]["activity_type"]
+          close_day_of_week?: number
+          close_time?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          open_day_of_week?: number
+          open_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       submissions: {
         Row: {
           activity_id: string
@@ -295,6 +352,15 @@ export type Database = {
           status: Database["public"]["Enums"]["activity_status"]
           title: string
           type: Database["public"]["Enums"]["activity_type"]
+        }[]
+      }
+      get_monthly_attendance: {
+        Args: { p_months?: number }
+        Returns: {
+          active_member_count: number
+          activity_count: number
+          month_start: string
+          present_count: number
         }[]
       }
       get_needs_follow_up: {
@@ -405,7 +471,12 @@ export type Database = {
         | "minister_in_charge"
         | "super_admin"
       geofence_outcome: "match" | "mismatch" | "unknown"
-      member_status_manual: "active" | "transferred" | "inactive"
+      member_status_manual:
+        | "active"
+        | "relocated"
+        | "suspended"
+        | "out_of_town"
+        | "other"
       submission_status: "present" | "absent" | "excused"
     }
     CompositeTypes: {
@@ -544,7 +615,13 @@ export const Constants = {
         "super_admin",
       ],
       geofence_outcome: ["match", "mismatch", "unknown"],
-      member_status_manual: ["active", "transferred", "inactive"],
+      member_status_manual: [
+        "active",
+        "relocated",
+        "suspended",
+        "out_of_town",
+        "other",
+      ],
       submission_status: ["present", "absent", "excused"],
     },
   },

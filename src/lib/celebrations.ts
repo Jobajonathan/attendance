@@ -49,8 +49,9 @@ function daysBetween(a: Date, b: Date): number {
 type CelebrationMember = Pick<Tables<"members">, "id" | "name" | "birthday" | "anniversary_date" | "status_manual">;
 
 // FR-CEL-01/02: today's + upcoming celebrations for the Leadership Dashboard.
-// Excludes only transferred members — inactive still shows, since a birthday
-// is a low-cost, potentially re-engaging touchpoint, not a status-gated feature.
+// Excludes only relocated members — suspended/out_of_town/other still show,
+// since a birthday is a low-cost, potentially re-engaging touchpoint, not a
+// status-gated feature.
 export function buildCelebrations(
   members: CelebrationMember[],
   today: Date,
@@ -60,7 +61,7 @@ export function buildCelebrations(
   const celebrations: Celebration[] = [];
 
   for (const member of members) {
-    if (member.status_manual === "transferred") continue;
+    if (member.status_manual === "relocated") continue;
 
     const candidates: [CelebrationType, string | null][] = [
       ["birthday", member.birthday],
