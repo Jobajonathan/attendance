@@ -1,6 +1,6 @@
 import type { Tables } from "@/lib/supabase/database.types";
 
-export type CelebrationType = "birthday" | "anniversary";
+export type CelebrationType = "birthday" | "anniversary" | "work_anniversary";
 
 export type Celebration = {
   memberId: string;
@@ -9,6 +9,7 @@ export type Celebration = {
   date: string;
   nextOccurrence: Date;
   isToday: boolean;
+  yearsSince?: number;
 };
 
 type MonthDay = { month: number; day: number };
@@ -46,7 +47,10 @@ function daysBetween(a: Date, b: Date): number {
   return Math.round((b.getTime() - a.getTime()) / (24 * 60 * 60 * 1000));
 }
 
-type CelebrationMember = Pick<Tables<"members">, "id" | "name" | "birthday" | "anniversary_date" | "status_manual">;
+type CelebrationMember = Pick<
+  Tables<"members">,
+  "id" | "name" | "birthday" | "anniversary_date" | "join_date" | "status_manual"
+>;
 
 // FR-CEL-01/02: today's + upcoming celebrations for the Leadership Dashboard.
 // Excludes only relocated members — suspended/out_of_town/other still show,
@@ -66,6 +70,10 @@ export function buildCelebrations(
     const candidates: [CelebrationType, string | null][] = [
       ["birthday", member.birthday],
       ["anniversary", member.anniversary_date],
+      // join_date always carries a real year (unlike birthday's year-2000
+      // sentinel for unknown birth years), so no special-casing is needed
+      // here beyond the yearsSince computation below.
+      ["work_anniversary", member.join_date],
     ];
 
     for (const [type, value] of candidates) {
@@ -84,6 +92,7 @@ export function buildCelebrations(
         date: value,
         nextOccurrence: next,
         isToday: diff === 0,
+        yearsSince: type === "work_anniversary" ? next.getFullYear() - Number(value.slice(0, 4)) : undefined,
       });
     }
   }

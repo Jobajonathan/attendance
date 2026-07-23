@@ -2,13 +2,25 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
 import { isLeadershipRole } from "@/lib/roles";
-import { buildCelebrations } from "@/lib/celebrations";
+import { buildCelebrations, type CelebrationType } from "@/lib/celebrations";
 import { computeEngagement, type WeeklyEngagementRow } from "@/lib/engagement";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { EngagementTrend } from "./engagement-trend";
 import { NeedsFollowUpTable } from "./needs-follow-up-table";
+
+const CELEBRATION_LABEL: Record<CelebrationType, string> = {
+  birthday: "Birthday",
+  anniversary: "Wedding Anniversary",
+  work_anniversary: "Work Anniversary",
+};
+
+const CELEBRATION_TONE: Record<CelebrationType, BadgeTone> = {
+  birthday: "brand",
+  anniversary: "success",
+  work_anniversary: "warning",
+};
 
 // Vercel runs in UTC; this church operates in WAT (UTC+1). A fixed +1 offset
 // is enough for "today" purposes on this single-timezone deployment (same
@@ -43,7 +55,7 @@ export default async function DashboardPage() {
     supabase.from("activities").select("id, title").eq("type", "attendance").eq("scheduled_date", todayStr),
     supabase.from("members").select("*", { count: "exact", head: true }).eq("status_manual", "suspended"),
     supabase.from("members").select("*", { count: "exact", head: true }).or("status_manual.is.null,status_manual.eq.active"),
-    supabase.from("members").select("id, name, birthday, anniversary_date, status_manual"),
+    supabase.from("members").select("id, name, birthday, anniversary_date, join_date, status_manual"),
     supabase.rpc("get_weekly_engagement_components", { p_weeks: 12 }),
     supabase.rpc("get_needs_follow_up", { p_threshold: 2 }),
   ]);
@@ -125,18 +137,24 @@ export default async function DashboardPage() {
       </Card>
       <EngagementTrend rows={weekly} />
 
-      <h2 className="font-heading mt-8 text-lg font-semibold text-neutral-900">Celebrations</h2>
+      <div className="mt-8 flex items-center justify-between">
+        <h2 className="font-heading text-lg font-semibold text-neutral-900">Celebrations</h2>
+        <Link href="/dashboard/celebrations-digest" className="text-xs text-brand underline">
+          Preview monthly digest
+        </Link>
+      </div>
       <Card className="mt-2 overflow-hidden">
         <ul className="divide-y divide-neutral-100 text-sm">
           {celebrations.map((c) => (
             <li key={`${c.memberId}-${c.type}`} className="flex items-center gap-2 px-4 py-3">
               <span className="font-medium text-neutral-900">{c.memberName}</span>
-              <Badge tone={c.type === "birthday" ? "brand" : "success"}>
-                {c.type === "birthday" ? "Birthday" : "Anniversary"}
-              </Badge>
+              <Badge tone={CELEBRATION_TONE[c.type]}>{CELEBRATION_LABEL[c.type]}</Badge>
               {c.isToday && <Badge tone="warning">Today</Badge>}
               <span className="text-neutral-500">
                 {c.nextOccurrence.toLocaleDateString(undefined, { month: "long", day: "numeric" })}
+                {c.type === "work_anniversary" && c.yearsSince !== undefined && (
+                  <> &middot; {c.yearsSince} {c.yearsSince === 1 ? "year" : "years"} with the department</>
+                )}
               </span>
             </li>
           ))}
