@@ -5,6 +5,11 @@ export default async function CheckinPage({ params }: { params: Promise<{ token:
   const { token } = await params;
   const supabase = await createClient();
 
+  // Opportunistic status sync — see the matching comment in /activities/page.tsx.
+  // The very first visitor to a check-in link "wakes up" a stale scheduled/open
+  // status, independent of staff activity or the coarse daily cron.
+  await supabase.rpc("sync_activity_statuses");
+
   const { data: activityRows } = await supabase.rpc("get_checkin_activity", { p_link_token: token });
   const activity = activityRows?.[0];
 

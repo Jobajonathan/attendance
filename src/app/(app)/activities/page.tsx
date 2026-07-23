@@ -7,6 +7,12 @@ export default async function ActivitiesPage() {
   const profile = await requireProfile();
   const supabase = await createClient();
 
+  // Vercel Hobby's cron granularity is daily at best (see vercel.json), so
+  // opportunistically re-run the same time-based transition on every load of
+  // this page — cheap, idempotent, and keeps FR-ATT-03 timely whenever staff
+  // are actually using the system, which is when it matters most.
+  await supabase.rpc("sync_activity_statuses");
+
   const { data: activities, error } = await supabase
     .from("activities")
     .select("*")

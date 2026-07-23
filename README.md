@@ -96,12 +96,16 @@ session.
 
 ## Deployment
 
-Deployed on Vercel. `vercel.json` configures the Cron job that keeps activity statuses current —
-set `SUPABASE_SERVICE_ROLE_KEY` and `CRON_SECRET` in the Vercel project's environment variables for
-it to work (see table above). Note Hobby-plan Vercel projects may restrict Cron to a coarser
-schedule than the `*/5 * * * *` configured here; adjust `vercel.json` to whatever your plan allows,
-since a longer gap just means activities open/close a little later than their configured time, not
-that anything breaks.
+Deployed on Vercel. `vercel.json` runs `/api/cron/sync-activities` once daily (`0 3 * * *`) —
+Vercel's Hobby plan rejects any cron schedule that fires more than once a day, so this is the
+coarsest-but-simplest choice, not the primary mechanism. FR-ATT-03's real-time transitions instead
+come from **opportunistic sync**: both `/activities` (staff) and `/checkin/[token]` (public) call
+the same idempotent `sync_activity_statuses()` RPC on every page load before reading activity data,
+so any traffic — staff checking the dashboard or a member opening the check-in link — self-heals a
+stale status. The daily cron is just a catch-all for activities nobody visits between their
+scheduled times. Set `SUPABASE_SERVICE_ROLE_KEY` and `CRON_SECRET` in the Vercel project's
+environment variables for the cron route to work (see table above). On a Pro plan (or self-hosted
+cron), you can tighten `vercel.json`'s schedule for a shorter worst-case staleness window.
 
 ## Known limitation of the development sandbox (not the app)
 
