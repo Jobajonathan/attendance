@@ -2,7 +2,10 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "./database.types";
 
-const PUBLIC_PATHS = ["/login"];
+// /checkin is the unauthenticated, activity-scoped self check-in flow (Section 1.5:
+// Protocol Members never get accounts). /api/cron is hit by Vercel Cron, not a
+// browser session; it authorizes itself via a bearer secret in the route handler.
+const PUBLIC_PATHS = ["/login", "/checkin", "/api/cron"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });

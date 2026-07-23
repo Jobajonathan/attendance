@@ -74,6 +74,44 @@ export type Database = {
           },
         ]
       }
+      audit_log: {
+        Row: {
+          acting_user_id: string | null
+          action: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          acting_user_id?: string | null
+          action: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          acting_user_id?: string | null
+          action?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_acting_user_id_fkey"
+            columns: ["acting_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       members: {
         Row: {
           anniversary_date: string | null
@@ -157,15 +195,112 @@ export type Database = {
         }
         Relationships: []
       }
+      submissions: {
+        Row: {
+          activity_id: string
+          geofence_outcome:
+            | Database["public"]["Enums"]["geofence_outcome"]
+            | null
+          id: string
+          member_id: string
+          response_payload: Json | null
+          status: Database["public"]["Enums"]["submission_status"]
+          submitted_at: string
+        }
+        Insert: {
+          activity_id: string
+          geofence_outcome?:
+            | Database["public"]["Enums"]["geofence_outcome"]
+            | null
+          id?: string
+          member_id: string
+          response_payload?: Json | null
+          status: Database["public"]["Enums"]["submission_status"]
+          submitted_at?: string
+        }
+        Update: {
+          activity_id?: string
+          geofence_outcome?:
+            | Database["public"]["Enums"]["geofence_outcome"]
+            | null
+          id?: string
+          member_id?: string
+          response_payload?: Json | null
+          status?: Database["public"]["Enums"]["submission_status"]
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      close_activity: {
+        Args: { p_activity_id: string; p_reason?: string }
+        Returns: undefined
+      }
       current_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      get_checkin_activity: {
+        Args: { p_link_token: string }
+        Returns: {
+          closes_at: string
+          id: string
+          opens_at: string
+          scheduled_date: string
+          status: Database["public"]["Enums"]["activity_status"]
+          title: string
+          type: Database["public"]["Enums"]["activity_type"]
+        }[]
+      }
+      list_checkin_members: {
+        Args: { p_link_token: string }
+        Returns: {
+          id: string
+          join_date: string
+          name: string
+        }[]
+      }
+      reopen_activity: {
+        Args: { p_activity_id: string; p_reason?: string }
+        Returns: {
+          outcome: string
+        }[]
+      }
+      submit_checkin: {
+        Args: {
+          p_keyword: string
+          p_lat?: number
+          p_link_token: string
+          p_lng?: number
+          p_member_id: string
+        }
+        Returns: {
+          geofence_outcome: Database["public"]["Enums"]["geofence_outcome"]
+          outcome: string
+          submission_status: Database["public"]["Enums"]["submission_status"]
+          submitted_at: string
+        }[]
+      }
+      sync_activity_statuses: { Args: never; Returns: undefined }
     }
     Enums: {
       activity_status: "scheduled" | "open" | "closed"
@@ -175,7 +310,9 @@ export type Database = {
         | "head_of_department"
         | "assistant_head_of_department"
         | "minister_in_charge"
+      geofence_outcome: "match" | "mismatch" | "unknown"
       member_status_manual: "active" | "transferred" | "inactive"
+      submission_status: "present" | "absent" | "excused"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -283,6 +420,23 @@ export type Enums<
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
 export const Constants = {
   public: {
     Enums: {
@@ -294,7 +448,9 @@ export const Constants = {
         "assistant_head_of_department",
         "minister_in_charge",
       ],
+      geofence_outcome: ["match", "mismatch", "unknown"],
       member_status_manual: ["active", "transferred", "inactive"],
+      submission_status: ["present", "absent", "excused"],
     },
   },
 } as const

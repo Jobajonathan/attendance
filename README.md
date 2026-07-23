@@ -4,46 +4,73 @@ Operations platform for the Light Nation Protocol Department. Built against the 
 Product Specification (v1.0) — see that document for the full requirements, business rules, and
 delivery plan this codebase implements incrementally.
 
-## Status: Phase 1 — Foundation
+## Status: Phase 2 — Attendance
 
-Per the specification's roadmap (Section 8.1), Phase 1 covers the Member Directory, the shared
-Activity data model, and role-based authentication. Later phases (Attendance, Leave Register,
-Message Review, Celebrations, Leadership Dashboard) build on this foundation and are not yet
-implemented; `/dashboard` and `/activities` are placeholder pages confirming the role-based
-landing routes from Section 6.2.
+Per the specification's roadmap (Section 8.1), Phase 2 adds the Attendance module end to end on
+top of Phase 1's Member Directory and Activity model. Later phases (Leave Register, Message
+Review, Celebrations, Leadership Dashboard) are not yet implemented; `/dashboard` is still a
+placeholder confirming the leadership landing route from Section 6.2.
 
-Implemented in this phase:
+Implemented in this phase (FR-ATT-01 to 10):
 
-- **Authentication & roles** — Supabase Auth session cookies via `@supabase/ssr`, with a
-  `profiles` table mapping each signed-in user to a ProtocolOS role (Administrative Officer, Head
-  of Department, Assistant Head of Department, Minister in Charge). Role permissions are enforced
-  at the database layer via Postgres Row Level Security, not only in the client.
-- **Member Directory** (FR-MEM-01 to 06) — list/search, create, edit, and deactivate (via a status
-  override) member records; CSV import from a Google Sheets export with per-row exception
-  reporting and duplicate/near-duplicate flagging (User Story MEM-1, FR-MEM-06).
-- **Activity data model** (Section 5.2, 5.4) — the shared `activities` table that Attendance and
-  Message Review will both build on in later phases. No screens yet; this phase only lays down
-  the schema and its RLS policies.
+- **Activity Management** (`/activities`) — Administrative Officer creates attendance activities
+  (title, schedule, opening/closing time, optional location + geofence radius); a unique
+  human-typeable keyword and check-in link are generated automatically. The list flags activities
+  still `open` past their closing time, and past-dated activities are marked "Backfilled" and
+  excluded from being treated as live.
+- **Public self check-in** (`/checkin/[token]`) — unauthenticated, activity-scoped (Section 1.5:
+  Protocol Members never get accounts). Searchable name list, keyword entry, optional device
+  geolocation. All business logic — closed/wrong-keyword/duplicate rejection, Haversine geofence
+  distance, non-blocking geofence flagging (BR-02) — runs inside a `SECURITY DEFINER` Postgres
+  function (`submit_checkin`) so the public path never touches the underlying tables directly.
+- **Manual overrides with audit trail** (FR-ATT-04, FR-ATT-05, BR-01) — Administrative Officer or
+  Head of Department can close an activity early; only the Head of Department can reopen a closed
+  one. Reopening on the same calendar day it closed needs no justification; reopening later
+  requires a reason, which (like every override) is written to `audit_log` with the acting user
+  and timestamp.
+- **Automatic status transitions** (FR-ATT-03) — a Vercel Cron job calls `sync_activity_statuses()`
+  on a schedule to flip `scheduled → open → closed` based on each activity's configured times, so
+  no one has to remember to open or close a session manually.
 
-Protocol Members never get accounts (Section 1.5) — there is no public signup. Every authenticated
-user is provisioned manually with a role; see "Provisioning the first account" below.
+Implemented in Phase 1: authentication & roles, the Member Directory, and the shared Activity data
+model — see git history / the Phase 1 PR for that detail.
+
+### A bug found and fixed in this phase
+
+`submit_checkin` originally treated *any* existing submission row as a duplicate — including the
+`absent` rows `close_activity` auto-creates for no-shows. That made it impossible for a late member
+to actually check in after a Head of Department reopened a session (User Story ATT-2 exists
+specifically for this). Fixed so only a genuine prior `present` submission blocks as a duplicate;
+anything else (`absent`, `excused`) is upgraded in place to `present` on a real check-in.
 
 ## Stack
 
 - Next.js (App Router, TypeScript, Tailwind)
-- Supabase: Postgres (migrations via the Supabase MCP tooling), Auth, Row Level Security
+- Supabase: Postgres (migrations via the Supabase MCP tooling), Auth, Row Level Security,
+  `SECURITY DEFINER` RPC functions for the public check-in surface
+- Vercel Cron for scheduled status transitions
 
 ## Getting started
 
 ```bash
 npm install
-cp .env.example .env.local   # fill in NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
+cp .env.example .env.local   # fill in the Supabase values, see below
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). Unauthenticated requests are redirected to
 `/login` by `src/proxy.ts` (Next.js 16 renamed Middleware to Proxy — see
-`node_modules/next/dist/docs/01-app/01-getting-started/16-proxy.md`).
+`node_modules/next/dist/docs/01-app/01-getting-started/16-proxy.md`); `/checkin/*` and `/api/cron/*`
+are explicitly public.
+
+### Environment variables
+
+| Variable | Used by | Notes |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | app | Public |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | app | Public |
+| `SUPABASE_SERVICE_ROLE_KEY` | `/api/cron/sync-activities` only | **Server-only, never `NEXT_PUBLIC_`.** From Supabase dashboard → Project Settings → API → service_role secret. |
+| `CRON_SECRET` | `/api/cron/sync-activities` only | Any random string. Set the same value in Vercel; Vercel automatically sends it as `Authorization: Bearer <value>` on Cron requests. |
 
 ### Provisioning the first account
 
@@ -60,18 +87,28 @@ Valid roles: `administrative_officer`, `head_of_department`, `assistant_head_of_
 
 ## Database
 
-Schema and RLS policies live in Supabase, applied as migrations named `phase1_*`
-(`phase1_roles_and_profiles`, `phase1_members`, `phase1_activities`,
-`phase1_security_lint_fixes`). Regenerate `src/lib/supabase/database.types.ts` after any schema
-change via the Supabase MCP `generate_typescript_types` tool, or the Supabase CLI if you're working
-outside an MCP-enabled session.
+Schema and RLS policies live in Supabase, applied as migrations. Phase 2 added `submissions`,
+`audit_log`, and the check-in/staff RPC functions (`get_checkin_activity`, `list_checkin_members`,
+`submit_checkin`, `close_activity`, `reopen_activity`, `sync_activity_statuses`). Regenerate
+`src/lib/supabase/database.types.ts` after any schema change via the Supabase MCP
+`generate_typescript_types` tool, or the Supabase CLI if you're working outside an MCP-enabled
+session.
 
-## Known limitation of this sandbox (not of the app)
+## Deployment
 
-This development sandbox's network policy blocks direct outbound HTTPS from the app process to
-`*.supabase.co` (confirmed via a 403 from the environment's egress proxy) — only the Supabase MCP
-tooling can reach it from here. As a result, the Auth/CRUD flows were verified via `tsc`, ESLint, a
-production build, and the unauthenticated-redirect path (`curl`), but the authenticated
-sign-in → Member Directory round trip could not be exercised end-to-end in a browser from this
-session. It should be tested in an environment with normal outbound internet access (e.g. a
-deployed preview, or a local machine) before this phase is considered done.
+Deployed on Vercel. `vercel.json` configures the Cron job that keeps activity statuses current —
+set `SUPABASE_SERVICE_ROLE_KEY` and `CRON_SECRET` in the Vercel project's environment variables for
+it to work (see table above). Note Hobby-plan Vercel projects may restrict Cron to a coarser
+schedule than the `*/5 * * * *` configured here; adjust `vercel.json` to whatever your plan allows,
+since a longer gap just means activities open/close a little later than their configured time, not
+that anything breaks.
+
+## Known limitation of the development sandbox (not the app)
+
+This project has been developed across two environments: a sandboxed remote session (network
+policy blocks direct outbound HTTPS from the running app to `*.supabase.co` and other
+non-allowlisted hosts — confirmed via 403s from the environment's egress proxy; only the Supabase
+MCP tooling can reach it from there) and local machines with normal internet access. Where the
+sandbox couldn't exercise a flow live in a browser, the underlying logic was verified by calling
+the same Postgres RPC functions directly via the Supabase MCP `execute_sql` tool against seeded
+test data (checked in, cleaned up afterward), in addition to `tsc`, ESLint, and a production build.
