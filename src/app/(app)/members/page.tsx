@@ -74,6 +74,9 @@ export default async function MembersPage({
               <th className="px-4 py-2">Joined</th>
               <th className="px-4 py-2">Status</th>
               <th className="px-4 py-2">Phone</th>
+              <th className="px-4 py-2">Occupation</th>
+              <th className="px-4 py-2">Marital Status</th>
+              <th className="px-4 py-2">Residential Address</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-100">
@@ -91,12 +94,15 @@ export default async function MembersPage({
                     <Badge tone={MEMBER_STATUS_TONE[status]}>{MEMBER_STATUS_LABELS[status]}</Badge>
                   </td>
                   <td className="px-4 py-2 text-neutral-500">{member.phone_number ?? "—"}</td>
+                  <td className="px-4 py-2 text-neutral-500">{member.occupation ?? "—"}</td>
+                  <td className="px-4 py-2 text-neutral-500 capitalize">{member.marital_status ?? "—"}</td>
+                  <td className="px-4 py-2 text-neutral-500">{member.residential_address ?? "—"}</td>
                 </tr>
               );
             })}
             {members?.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-neutral-400">
+                <td colSpan={7} className="px-4 py-6 text-center text-neutral-400">
                   No members found.
                 </td>
               </tr>

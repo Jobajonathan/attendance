@@ -124,6 +124,7 @@ export type Database = {
           id: string
           join_date: string
           join_reason: string | null
+          marital_status: string | null
           name: string
           occupation: string | null
           phone_number: string | null
@@ -132,6 +133,7 @@ export type Database = {
           status_manual:
             | Database["public"]["Enums"]["member_status_manual"]
             | null
+          status_reason: string | null
           updated_at: string
         }
         Insert: {
@@ -143,6 +145,7 @@ export type Database = {
           id?: string
           join_date?: string
           join_reason?: string | null
+          marital_status?: string | null
           name: string
           occupation?: string | null
           phone_number?: string | null
@@ -151,6 +154,7 @@ export type Database = {
           status_manual?:
             | Database["public"]["Enums"]["member_status_manual"]
             | null
+          status_reason?: string | null
           updated_at?: string
         }
         Update: {
@@ -162,6 +166,7 @@ export type Database = {
           id?: string
           join_date?: string
           join_reason?: string | null
+          marital_status?: string | null
           name?: string
           occupation?: string | null
           phone_number?: string | null
@@ -170,6 +175,7 @@ export type Database = {
           status_manual?:
             | Database["public"]["Enums"]["member_status_manual"]
             | null
+          status_reason?: string | null
           updated_at?: string
         }
         Relationships: [

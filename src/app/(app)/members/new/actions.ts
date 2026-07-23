@@ -21,6 +21,7 @@ export async function createMember(_prevState: { error: string } | null, formDat
     phone_number: String(formData.get("phone_number") ?? "").trim() || null,
     occupation: String(formData.get("occupation") ?? "").trim() || null,
     gender: String(formData.get("gender") ?? "").trim() || null,
+    marital_status: String(formData.get("marital_status") ?? "").trim() || null,
     join_date: String(formData.get("join_date") ?? "") || undefined,
     birthday: String(formData.get("birthday") ?? "") || null,
     anniversary_date: String(formData.get("anniversary_date") ?? "") || null,
