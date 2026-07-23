@@ -21,6 +21,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                   Dashboard
                 </Link>
               )}
+              {leadership && (
+                <Link href="/analytics" className="text-neutral-600 hover:text-brand">
+                  Analytics
+                </Link>
+              )}
               <Link href="/activities" className="text-neutral-600 hover:text-brand">
                 Activities
               </Link>
