@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createMember } from "./actions";
 import { Field } from "@/components/ui/field";
 import { Alert } from "@/components/ui/alert";
@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/ui/page-header";
 
 export default function NewMemberPage() {
   const [state, formAction, pending] = useActionState(createMember, null);
+  const [maritalStatus, setMaritalStatus] = useState("");
 
   return (
     <div className="max-w-lg">
@@ -18,7 +19,22 @@ export default function NewMemberPage() {
         <Field label="Name" name="name" type="text" required />
         <Field label="Phone number" name="phone_number" type="tel" />
         <Field label="Occupation" name="occupation" type="text" />
-        <Field label="Gender" name="gender" type="text" />
+
+        <div className="space-y-1">
+          <label htmlFor="gender" className="text-sm font-medium text-neutral-700">
+            Gender
+          </label>
+          <select
+            id="gender"
+            name="gender"
+            defaultValue=""
+            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+          >
+            <option value="">Not specified</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
 
         <div className="space-y-1">
           <label htmlFor="marital_status" className="text-sm font-medium text-neutral-700">
@@ -27,7 +43,8 @@ export default function NewMemberPage() {
           <select
             id="marital_status"
             name="marital_status"
-            defaultValue=""
+            value={maritalStatus}
+            onChange={(e) => setMaritalStatus(e.target.value)}
             className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
           >
             <option value="">Not specified</option>
@@ -40,7 +57,9 @@ export default function NewMemberPage() {
 
         <Field label="Join date" name="join_date" type="date" />
         <Field label="Birthday" name="birthday" type="date" />
-        <Field label="Wedding anniversary" name="anniversary_date" type="date" />
+        {maritalStatus === "married" && (
+          <Field label="Wedding anniversary" name="anniversary_date" type="date" />
+        )}
 
         <div className="space-y-1">
           <label htmlFor="residential_address" className="text-sm font-medium text-neutral-700">
