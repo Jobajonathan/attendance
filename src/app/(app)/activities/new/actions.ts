@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
 import { generateActivityKeyword } from "@/lib/activity-keyword";
+import { datetimeLocalToUtcIso } from "@/lib/timezone";
 import type { Enums } from "@/lib/supabase/database.types";
 
 export async function createActivity(_prevState: { error: string } | null, formData: FormData) {
@@ -32,6 +33,8 @@ export async function createActivity(_prevState: { error: string } | null, formD
   const latRaw = type === "attendance" ? String(formData.get("location_lat") ?? "").trim() : "";
   const lngRaw = type === "attendance" ? String(formData.get("location_lng") ?? "").trim() : "";
   const radiusRaw = type === "attendance" ? String(formData.get("geofence_radius_m") ?? "").trim() : "";
+  const keywordNoLocationRaw =
+    type === "attendance" ? String(formData.get("keyword_no_location") ?? "").trim() : "";
 
   // FR-ATT-09: an activity scheduled for a date already in the past is backfilled
   // history, not a live session, and stays out of real-time dashboard cards later.
@@ -44,12 +47,13 @@ export async function createActivity(_prevState: { error: string } | null, formD
       type,
       title,
       scheduled_date: scheduledDate,
-      opens_at: new Date(opensAt).toISOString(),
-      closes_at: new Date(closesAt).toISOString(),
+      opens_at: datetimeLocalToUtcIso(opensAt),
+      closes_at: datetimeLocalToUtcIso(closesAt),
       location_lat: latRaw ? Number(latRaw) : null,
       location_lng: lngRaw ? Number(lngRaw) : null,
       geofence_radius_m: radiusRaw ? Number(radiusRaw) : null,
       keyword: generateActivityKeyword(),
+      keyword_no_location: keywordNoLocationRaw ? keywordNoLocationRaw.toUpperCase() : null,
       is_backfilled: isBackfilled,
       created_by: profile.id,
     });

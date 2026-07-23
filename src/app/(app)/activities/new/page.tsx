@@ -67,6 +67,25 @@ export default function NewActivityPage() {
           </fieldset>
         )}
 
+        {type === "attendance" && (
+          <div className="space-y-1">
+            <label htmlFor="keyword_no_location" className="text-sm font-medium text-neutral-700">
+              Alternate keyword (no location required)
+            </label>
+            <p className="text-xs text-neutral-500">
+              Optional. Members who can&apos;t share their location can check the &quot;I&apos;m unable
+              to share my location&quot; box and use this keyword instead of the regular one. Leave
+              blank if this activity shouldn&apos;t offer a no-location fallback.
+            </p>
+            <input
+              id="keyword_no_location"
+              name="keyword_no_location"
+              type="text"
+              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm uppercase focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+            />
+          </div>
+        )}
+
         {state?.error && <Alert tone="error">{state.error}</Alert>}
 
         <Button type="submit" disabled={pending}>
