@@ -1,6 +1,7 @@
 import type { Database } from "@/lib/supabase/database.types";
 
 export type WeeklyEngagementRow = Database["public"]["Functions"]["get_weekly_engagement_components"]["Returns"][number];
+export type MonthlyAttendanceRow = Database["public"]["Functions"]["get_monthly_attendance"]["Returns"][number];
 
 function rate(present: number, total: number): number | null {
   if (total === 0) return null;
@@ -27,4 +28,16 @@ export function computeEngagement(rows: WeeklyEngagementRow[]): number | null {
   if (attendanceRate === null) return reviewRate;
   if (reviewRate === null) return attendanceRate;
   return (attendanceRate + reviewRate) / 2;
+}
+
+// Average attendance rate for a period: present-markings ÷ (active members ×
+// services held), i.e. "present vs total active members vs duration" — the
+// same formula covers a single month, 6 months, or a year by just summing
+// more of get_monthly_attendance's rows before dividing (no separate query
+// per period). A month with no closed attendance activities contributes
+// nothing to either side rather than skewing the rate toward 0.
+export function computeMonthlyAttendanceRate(rows: MonthlyAttendanceRow[]): number | null {
+  const presentTotal = rows.reduce((sum, r) => sum + r.present_count, 0);
+  const denominator = rows.reduce((sum, r) => sum + r.active_member_count * r.activity_count, 0);
+  return rate(presentTotal, denominator);
 }
