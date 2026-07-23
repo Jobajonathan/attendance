@@ -7,6 +7,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -121,9 +123,12 @@ export type Database = {
           gender: string | null
           id: string
           join_date: string
+          join_reason: string | null
           name: string
+          occupation: string | null
           phone_number: string | null
           photo_url: string | null
+          residential_address: string | null
           status_manual:
             | Database["public"]["Enums"]["member_status_manual"]
             | null
@@ -137,9 +142,12 @@ export type Database = {
           gender?: string | null
           id?: string
           join_date?: string
+          join_reason?: string | null
           name: string
+          occupation?: string | null
           phone_number?: string | null
           photo_url?: string | null
+          residential_address?: string | null
           status_manual?:
             | Database["public"]["Enums"]["member_status_manual"]
             | null
@@ -153,9 +161,12 @@ export type Database = {
           gender?: string | null
           id?: string
           join_date?: string
+          join_reason?: string | null
           name?: string
+          occupation?: string | null
           phone_number?: string | null
           photo_url?: string | null
+          residential_address?: string | null
           status_manual?:
             | Database["public"]["Enums"]["member_status_manual"]
             | null
@@ -174,22 +185,28 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          email: string | null
           full_name: string
           id: string
+          is_active: boolean
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string
         }
         Insert: {
           created_at?: string
+          email?: string | null
           full_name: string
           id: string
+          is_active?: boolean
           role: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
         Update: {
           created_at?: string
+          email?: string | null
           full_name?: string
           id?: string
+          is_active?: boolean
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
@@ -278,6 +295,25 @@ export type Database = {
           title: string
         }[]
       }
+      get_open_review_link: {
+        Args: never
+        Returns: {
+          link_token: string
+          title: string
+        }[]
+      }
+      get_review_activity: {
+        Args: { p_link_token: string }
+        Returns: {
+          closes_at: string
+          id: string
+          opens_at: string
+          scheduled_date: string
+          status: Database["public"]["Enums"]["activity_status"]
+          title: string
+          type: Database["public"]["Enums"]["activity_type"]
+        }[]
+      }
       list_checkin_members: {
         Args: { p_link_token: string }
         Returns: {
@@ -302,6 +338,21 @@ export type Database = {
         }
         Returns: {
           geofence_outcome: Database["public"]["Enums"]["geofence_outcome"]
+          outcome: string
+          submission_status: Database["public"]["Enums"]["submission_status"]
+          submitted_at: string
+        }[]
+      }
+      submit_message_review: {
+        Args: {
+          p_confirmed: boolean
+          p_keyword: string
+          p_link_token: string
+          p_member_id: string
+          p_rating: number
+          p_reflection: string
+        }
+        Returns: {
           outcome: string
           submission_status: Database["public"]["Enums"]["submission_status"]
           submitted_at: string

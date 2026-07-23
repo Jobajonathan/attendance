@@ -7,14 +7,22 @@ import type { Database } from "./database.types";
 // would make every route public.
 const PUBLIC_EXACT_PATHS = ["/"];
 
-// /checkin is the unauthenticated, activity-scoped self check-in flow (Section 1.5:
-// Protocol Members never get accounts). /api/cron is hit by Vercel Cron, not a
-// browser session; it authorizes itself via a bearer secret in the route handler.
+// /checkin and /review are the unauthenticated, activity-scoped self
+// check-in/message-review flows (Section 1.5: Protocol Members never get
+// accounts). /api/cron is hit by Vercel Cron, not a browser session; it
+// authorizes itself via a bearer secret in the route handler.
 // /forgot-password and /reset-password are reached before a normal session exists
 // (reset-password specifically: the recovery token lives in the URL fragment,
 // which never reaches this server-side check, so the page has to be reachable
 // and establish its own session client-side).
-const PUBLIC_PREFIX_PATHS = ["/login", "/checkin", "/api/cron", "/forgot-password", "/reset-password"];
+const PUBLIC_PREFIX_PATHS = [
+  "/login",
+  "/checkin",
+  "/review",
+  "/api/cron",
+  "/forgot-password",
+  "/reset-password",
+];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });

@@ -4,12 +4,16 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
 import { generateActivityKeyword } from "@/lib/activity-keyword";
+import type { Enums } from "@/lib/supabase/database.types";
 
 export async function createActivity(_prevState: { error: string } | null, formData: FormData) {
   const profile = await requireProfile();
   if (profile.role !== "administrative_officer") {
     return { error: "Only the Administrative Officer can create activities." };
   }
+
+  const typeRaw = String(formData.get("type") ?? "attendance");
+  const type: Enums<"activity_type"> = typeRaw === "message_review" ? "message_review" : "attendance";
 
   const title = String(formData.get("title") ?? "").trim();
   const scheduledDate = String(formData.get("scheduled_date") ?? "");
@@ -23,9 +27,11 @@ export async function createActivity(_prevState: { error: string } | null, formD
     return { error: "Closing time must be after opening time." };
   }
 
-  const latRaw = String(formData.get("location_lat") ?? "").trim();
-  const lngRaw = String(formData.get("location_lng") ?? "").trim();
-  const radiusRaw = String(formData.get("geofence_radius_m") ?? "").trim();
+  // Message Review has no geofence concept — ignore any submitted values
+  // regardless of type, rather than trusting the client to have hidden them.
+  const latRaw = type === "attendance" ? String(formData.get("location_lat") ?? "").trim() : "";
+  const lngRaw = type === "attendance" ? String(formData.get("location_lng") ?? "").trim() : "";
+  const radiusRaw = type === "attendance" ? String(formData.get("geofence_radius_m") ?? "").trim() : "";
 
   // FR-ATT-09: an activity scheduled for a date already in the past is backfilled
   // history, not a live session, and stays out of real-time dashboard cards later.
@@ -35,7 +41,7 @@ export async function createActivity(_prevState: { error: string } | null, formD
 
   for (let attempt = 0; attempt < 5; attempt++) {
     const { error } = await supabase.from("activities").insert({
-      type: "attendance",
+      type,
       title,
       scheduled_date: scheduledDate,
       opens_at: new Date(opensAt).toISOString(),

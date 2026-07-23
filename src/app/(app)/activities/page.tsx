@@ -14,6 +14,11 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   closed: "neutral",
 };
 
+const TYPE_LABELS: Record<string, string> = {
+  attendance: "Attendance",
+  message_review: "Message Review",
+};
+
 export default async function ActivitiesPage() {
   const profile = await requireProfile();
   const supabase = await createClient();
@@ -36,7 +41,7 @@ export default async function ActivitiesPage() {
     <div>
       <PageHeader
         title="Activities"
-        action={canCreate && <LinkButton href="/activities/new" size="sm">+ New attendance activity</LinkButton>}
+        action={canCreate && <LinkButton href="/activities/new" size="sm">+ New activity</LinkButton>}
       />
 
       {error && (
@@ -50,6 +55,7 @@ export default async function ActivitiesPage() {
           <thead className="bg-neutral-50 text-left text-xs font-medium uppercase tracking-wide text-neutral-500">
             <tr>
               <th className="px-4 py-2">Title</th>
+              <th className="px-4 py-2">Type</th>
               <th className="px-4 py-2">Scheduled</th>
               <th className="px-4 py-2">Opens</th>
               <th className="px-4 py-2">Closes</th>
@@ -74,6 +80,7 @@ export default async function ActivitiesPage() {
                       </Badge>
                     )}
                   </td>
+                  <td className="px-4 py-2 text-neutral-500">{TYPE_LABELS[activity.type]}</td>
                   <td className="px-4 py-2 text-neutral-500">{activity.scheduled_date}</td>
                   <td className="px-4 py-2 text-neutral-500">{new Date(activity.opens_at).toLocaleString()}</td>
                   <td className="px-4 py-2 text-neutral-500">{new Date(activity.closes_at).toLocaleString()}</td>
@@ -90,7 +97,7 @@ export default async function ActivitiesPage() {
             })}
             {activities?.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-neutral-400">
+                <td colSpan={6} className="px-4 py-6 text-center text-neutral-400">
                   No activities yet.
                 </td>
               </tr>

@@ -29,8 +29,12 @@ export default async function Home() {
   // Section 1.5: Protocol Members never sign in — this page is their only
   // entry point, so it has to tell them, without opening any link, whether
   // there's actually something open to submit right now.
-  const { data: openRows } = await supabase.rpc("get_open_checkin_link");
-  const openCheckin = openRows?.[0];
+  const [{ data: openCheckinRows }, { data: openReviewRows }] = await Promise.all([
+    supabase.rpc("get_open_checkin_link"),
+    supabase.rpc("get_open_review_link"),
+  ]);
+  const openCheckin = openCheckinRows?.[0];
+  const openReview = openReviewRows?.[0];
 
   return (
     <div className="flex min-h-screen flex-1 flex-col bg-neutral-50">
@@ -71,15 +75,28 @@ export default async function Home() {
             </Card>
           )}
 
-          <Card className="cursor-not-allowed p-4 opacity-60">
-            <h2 className="font-heading text-base font-semibold text-neutral-900">
-              Message Review
-            </h2>
-            <p className="mt-1 text-sm text-neutral-500">
-              No session is open right now. Check back once your Administrative Officer starts
-              one.
-            </p>
-          </Card>
+          {openReview ? (
+            <Card className="p-4">
+              <a href={`/review/${openReview.link_token}`} className="block">
+                <h2 className="font-heading text-base font-semibold text-neutral-900">
+                  Message Review
+                </h2>
+                <p className="mt-1 text-sm text-neutral-500">
+                  {openReview.title} is open now. Tap to submit your review.
+                </p>
+              </a>
+            </Card>
+          ) : (
+            <Card className="cursor-not-allowed p-4 opacity-60">
+              <h2 className="font-heading text-base font-semibold text-neutral-900">
+                Message Review
+              </h2>
+              <p className="mt-1 text-sm text-neutral-500">
+                No session is open right now. Check back once your Administrative Officer starts
+                one.
+              </p>
+            </Card>
+          )}
         </div>
       </main>
     </div>
