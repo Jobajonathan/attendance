@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
 import { isLeadershipRole } from "@/lib/roles";
@@ -7,7 +8,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EngagementTrend } from "./engagement-trend";
-import { NeedsFollowUpTable } from "./needs-follow-up-table";
+import { NeedsFollowUpTable, type FollowUpAssignment } from "./needs-follow-up-table";
 
 // Vercel runs in UTC; this church operates in WAT (UTC+1). A fixed +1 offset
 // is enough for "today" purposes on this single-timezone deployment (same
@@ -37,13 +38,32 @@ export default async function DashboardPage() {
     { data: celebrationMembers },
     { data: weeklyRows },
     { data: followUpRows },
+    { data: assignmentRows },
   ] = await Promise.all([
     supabase.from("activities").select("id").eq("type", "attendance").eq("scheduled_date", todayStr),
-    supabase.from("members").select("*", { count: "exact", head: true }).eq("status_manual", "inactive"),
+    supabase.from("members").select("*", { count: "exact", head: true }).eq("status_manual", "suspended"),
     supabase.from("members").select("id, name, birthday, anniversary_date, status_manual"),
     supabase.rpc("get_weekly_engagement_components", { p_weeks: 12 }),
     supabase.rpc("get_needs_follow_up", { p_threshold: 2 }),
+    supabase
+      .from("follow_up_assignments")
+      .select("member_id, assignee_name, status, token, assigned_at")
+      .order("assigned_at", { ascending: false }),
   ]);
+
+  const headerList = await headers();
+  const origin = `${headerList.get("x-forwarded-proto") ?? "https"}://${headerList.get("host")}`;
+
+  const assignmentsByMember = new Map<string, FollowUpAssignment>();
+  for (const row of assignmentRows ?? []) {
+    if (!assignmentsByMember.has(row.member_id)) {
+      assignmentsByMember.set(row.member_id, {
+        assigneeName: row.assignee_name,
+        status: row.status,
+        url: `${origin}/followup/${row.token}`,
+      });
+    }
+  }
 
   const todaysActivityIds = todaysActivities?.map((a) => a.id) ?? [];
   let presentCount = 0;
@@ -132,7 +152,7 @@ export default async function DashboardPage() {
       </Card>
 
       <h2 className="font-heading mt-8 text-lg font-semibold text-neutral-900">Needs Follow Up</h2>
-      <NeedsFollowUpTable rows={followUpRows ?? []} canContact={canContact} />
+      <NeedsFollowUpTable rows={followUpRows ?? []} canContact={canContact} assignments={assignmentsByMember} />
     </div>
   );
 }

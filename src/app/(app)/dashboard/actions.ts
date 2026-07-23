@@ -23,3 +23,29 @@ export async function markContacted(memberId: string, _prevState: { error: strin
   revalidatePath("/dashboard");
   return { error: "" };
 }
+
+export async function assignFollowUp(memberId: string, _prevState: { error: string } | null, formData: FormData) {
+  const profile = await requireProfile();
+  if (!isLeadershipRole(profile.role)) {
+    return { error: "Only leadership can assign a follow-up." };
+  }
+
+  const assigneeName = String(formData.get("assignee_name") ?? "").trim();
+  if (!assigneeName) {
+    return { error: "Assignee name is required." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("follow_up_assignments").insert({
+    member_id: memberId,
+    assignee_name: assigneeName,
+    assignee_phone: String(formData.get("assignee_phone") ?? "").trim() || null,
+    assigned_by: profile.id,
+  });
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/dashboard");
+  return { error: "" };
+}
