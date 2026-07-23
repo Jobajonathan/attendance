@@ -42,7 +42,7 @@ export default async function MembersPage({
           canManage && (
             <div className="flex gap-2">
               <LinkButton href="/members/import" variant="secondary" size="sm">
-                Import from Google Sheets
+                Import Members
               </LinkButton>
               <LinkButton href="/members/new" size="sm">
                 Add member
