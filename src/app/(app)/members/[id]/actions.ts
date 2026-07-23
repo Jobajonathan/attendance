@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
+import { canManageOperations } from "@/lib/roles";
 
 export async function updateMember(
   memberId: string,
@@ -10,8 +11,8 @@ export async function updateMember(
   formData: FormData,
 ) {
   const profile = await requireProfile();
-  if (profile.role !== "administrative_officer") {
-    return { error: "Only the Administrative Officer can edit members." };
+  if (!canManageOperations(profile.role)) {
+    return { error: "Only the Administrative Officer or a super admin can edit members." };
   }
 
   const name = String(formData.get("name") ?? "").trim();

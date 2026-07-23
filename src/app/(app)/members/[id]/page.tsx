@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
+import { canManageOperations } from "@/lib/roles";
 import EditMemberForm from "./edit-form";
 import { updateMember } from "./actions";
 import { Card } from "@/components/ui/card";
@@ -58,7 +59,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
       <EditMemberForm
         member={member}
         action={boundAction}
-        canManage={profile.role === "administrative_officer"}
+        canManage={canManageOperations(profile.role)}
       />
 
       <h2 className="font-heading mt-8 text-lg font-semibold text-neutral-900">Activity history</h2>

@@ -4,12 +4,13 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
 import { generateActivityKeyword } from "@/lib/activity-keyword";
+import { canManageOperations } from "@/lib/roles";
 import type { Enums } from "@/lib/supabase/database.types";
 
 export async function createActivity(_prevState: { error: string } | null, formData: FormData) {
   const profile = await requireProfile();
-  if (profile.role !== "administrative_officer") {
-    return { error: "Only the Administrative Officer can create activities." };
+  if (!canManageOperations(profile.role)) {
+    return { error: "Only the Administrative Officer or a super admin can create activities." };
   }
 
   const typeRaw = String(formData.get("type") ?? "attendance");
