@@ -9,17 +9,15 @@ type Member = { id: string; name: string; join_date: string };
 
 const GEOLOCATION_TIMEOUT_MS = 8000;
 
-function getCurrentPosition(): Promise<GeolocationPosition | null> {
-  return new Promise((resolve) => {
+function getCurrentPosition(): Promise<GeolocationPosition> {
+  return new Promise((resolve, reject) => {
     if (!("geolocation" in navigator)) {
-      resolve(null);
+      reject(new Error("not_supported"));
       return;
     }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolve(pos),
-      () => resolve(null), // declined or unavailable — treated as Unknown, never blocks (BR-02)
-      { timeout: GEOLOCATION_TIMEOUT_MS },
-    );
+    navigator.geolocation.getCurrentPosition(resolve, () => reject(new Error("denied")), {
+      timeout: GEOLOCATION_TIMEOUT_MS,
+    });
   });
 }
 
@@ -28,6 +26,7 @@ export function CheckinForm({ token, members }: { token: string; members: Member
   const [selected, setSelected] = useState<Member | null>(null);
   const [keyword, setKeyword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [locationError, setLocationError] = useState("");
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   const matches = useMemo(() => {
@@ -42,16 +41,29 @@ export function CheckinForm({ token, members }: { token: string; members: Member
 
     setSubmitting(true);
     setResult(null);
+    setLocationError("");
 
-    const position = await getCurrentPosition();
+    // Location sharing is required to check in — sharing your device's
+    // location is how attendance gets recorded, not an optional extra.
+    let position: GeolocationPosition;
+    try {
+      position = await getCurrentPosition();
+    } catch {
+      setSubmitting(false);
+      setLocationError(
+        "Location access is required to check in. Please allow location sharing in your browser and try again.",
+      );
+      return;
+    }
+
     const supabase = createClient();
     const { data, error } = await supabase
       .rpc("submit_checkin", {
         p_link_token: token,
         p_member_id: selected.id,
         p_keyword: keyword.trim(),
-        p_lat: position?.coords.latitude,
-        p_lng: position?.coords.longitude,
+        p_lat: position.coords.latitude,
+        p_lng: position.coords.longitude,
       })
       .single();
 
@@ -156,6 +168,12 @@ export function CheckinForm({ token, members }: { token: string; members: Member
           className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm uppercase focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
         />
       </div>
+
+      <p className="text-xs text-neutral-500">
+        You&apos;ll be asked to share your location — this is required to check in.
+      </p>
+
+      {locationError && <Alert tone="error">{locationError}</Alert>}
 
       <Button type="submit" disabled={!selected || !keyword.trim() || submitting} fullWidth>
         {submitting ? "Checking in..." : "Check in"}
