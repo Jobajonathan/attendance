@@ -2,22 +2,22 @@
 
 import { useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 type Member = { id: string; name: string; join_date: string };
 
 const GEOLOCATION_TIMEOUT_MS = 8000;
 
-function getCurrentPosition(): Promise<GeolocationPosition | null> {
-  return new Promise((resolve) => {
+function getCurrentPosition(): Promise<GeolocationPosition> {
+  return new Promise((resolve, reject) => {
     if (!("geolocation" in navigator)) {
-      resolve(null);
+      reject(new Error("not_supported"));
       return;
     }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolve(pos),
-      () => resolve(null), // declined or unavailable — treated as Unknown, never blocks (BR-02)
-      { timeout: GEOLOCATION_TIMEOUT_MS },
-    );
+    navigator.geolocation.getCurrentPosition(resolve, () => reject(new Error("denied")), {
+      timeout: GEOLOCATION_TIMEOUT_MS,
+    });
   });
 }
 
@@ -26,6 +26,7 @@ export function CheckinForm({ token, members }: { token: string; members: Member
   const [selected, setSelected] = useState<Member | null>(null);
   const [keyword, setKeyword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [locationError, setLocationError] = useState("");
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   const matches = useMemo(() => {
@@ -40,16 +41,29 @@ export function CheckinForm({ token, members }: { token: string; members: Member
 
     setSubmitting(true);
     setResult(null);
+    setLocationError("");
 
-    const position = await getCurrentPosition();
+    // Location sharing is required to check in — sharing your device's
+    // location is how attendance gets recorded, not an optional extra.
+    let position: GeolocationPosition;
+    try {
+      position = await getCurrentPosition();
+    } catch {
+      setSubmitting(false);
+      setLocationError(
+        "Location access is required to check in. Please allow location sharing in your browser and try again.",
+      );
+      return;
+    }
+
     const supabase = createClient();
     const { data, error } = await supabase
       .rpc("submit_checkin", {
         p_link_token: token,
         p_member_id: selected.id,
         p_keyword: keyword.trim(),
-        p_lat: position?.coords.latitude,
-        p_lng: position?.coords.longitude,
+        p_lat: position.coords.latitude,
+        p_lng: position.coords.longitude,
       })
       .single();
 
@@ -83,20 +97,22 @@ export function CheckinForm({ token, members }: { token: string; members: Member
 
   if (result) {
     return (
-      <p className={`mt-4 text-sm ${result.ok ? "text-emerald-700" : "text-red-600"}`}>{result.message}</p>
+      <Alert tone={result.ok ? "success" : "error"} className="mt-4">
+        {result.message}
+      </Alert>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
       <div className="space-y-1">
-        <label htmlFor="member-search" className="text-sm font-medium text-zinc-700">
+        <label htmlFor="member-search" className="text-sm font-medium text-neutral-700">
           Your name
         </label>
         {selected ? (
-          <div className="flex items-center justify-between rounded-md border border-zinc-300 px-3 py-2 text-sm">
+          <div className="flex items-center justify-between rounded-md border border-neutral-300 px-3 py-2 text-sm">
             <span>
-              {selected.name} <span className="text-zinc-400">— joined {selected.join_date}</span>
+              {selected.name} <span className="text-neutral-400">— joined {selected.join_date}</span>
             </span>
             <button
               type="button"
@@ -104,7 +120,7 @@ export function CheckinForm({ token, members }: { token: string; members: Member
                 setSelected(null);
                 setQuery("");
               }}
-              className="text-xs text-zinc-500 underline"
+              className="text-xs text-brand underline"
             >
               change
             </button>
@@ -118,18 +134,18 @@ export function CheckinForm({ token, members }: { token: string; members: Member
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Start typing your name..."
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
+              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
             />
             {matches.length > 0 && (
-              <ul className="mt-1 divide-y divide-zinc-100 rounded-md border border-zinc-200">
+              <ul className="mt-1 divide-y divide-neutral-100 rounded-md border border-neutral-200">
                 {matches.map((m) => (
                   <li key={m.id}>
                     <button
                       type="button"
                       onClick={() => setSelected(m)}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-50"
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-50"
                     >
-                      {m.name} <span className="text-zinc-400">— joined {m.join_date}</span>
+                      {m.name} <span className="text-neutral-400">— joined {m.join_date}</span>
                     </button>
                   </li>
                 ))}
@@ -140,7 +156,7 @@ export function CheckinForm({ token, members }: { token: string; members: Member
       </div>
 
       <div className="space-y-1">
-        <label htmlFor="keyword" className="text-sm font-medium text-zinc-700">
+        <label htmlFor="keyword" className="text-sm font-medium text-neutral-700">
           Session keyword
         </label>
         <input
@@ -149,17 +165,19 @@ export function CheckinForm({ token, members }: { token: string; members: Member
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           required
-          className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm uppercase focus:border-zinc-500 focus:outline-none"
+          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm uppercase focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={!selected || !keyword.trim() || submitting}
-        className="w-full rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
-      >
+      <p className="text-xs text-neutral-500">
+        You&apos;ll be asked to share your location — this is required to check in.
+      </p>
+
+      {locationError && <Alert tone="error">{locationError}</Alert>}
+
+      <Button type="submit" disabled={!selected || !keyword.trim() || submitting} fullWidth>
         {submitting ? "Checking in..." : "Check in"}
-      </button>
+      </Button>
     </form>
   );
 }

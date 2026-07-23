@@ -18,8 +18,8 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
 
   return (
     <div className="max-w-lg">
-      <h1 className="text-2xl font-semibold text-zinc-900">{member.name}</h1>
-      <p className="text-sm text-zinc-500">Joined {member.join_date}</p>
+      <h1 className="font-heading text-2xl font-semibold text-neutral-900">{member.name}</h1>
+      <p className="text-sm text-neutral-500">Joined {member.join_date}</p>
 
       <EditMemberForm
         member={member}

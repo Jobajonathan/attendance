@@ -1,5 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { CheckinForm } from "./checkin-form";
+import { Logo } from "@/components/logo";
+import { Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
 
 export default async function CheckinPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -19,34 +22,34 @@ export default async function CheckinPage({ params }: { params: Promise<{ token:
       : [];
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 px-4 py-12">
-      <div className="w-full max-w-sm rounded-lg border border-zinc-200 bg-white p-8 shadow-sm">
+    <div className="flex flex-1 flex-col items-center justify-center bg-neutral-50 px-4 py-12">
+      <Logo size={40} className="mb-6" />
+      <Card className="w-full max-w-sm p-8">
         {!activity ? (
-          <p className="text-sm text-zinc-700">This check-in link isn&apos;t valid.</p>
+          <Alert tone="info">This check-in link isn&apos;t valid.</Alert>
         ) : activity.status === "closed" ? (
           <>
-            <h1 className="text-lg font-semibold text-zinc-900">{activity.title}</h1>
-            <p className="mt-2 text-sm text-zinc-700">
+            <h1 className="font-heading text-lg font-semibold text-neutral-900">{activity.title}</h1>
+            <Alert tone="info" className="mt-3">
               This session is closed. If you were present, let your Administrative Officer know
               directly.
-            </p>
+            </Alert>
           </>
         ) : activity.status === "scheduled" ? (
           <>
-            <h1 className="text-lg font-semibold text-zinc-900">{activity.title}</h1>
-            <p className="mt-2 text-sm text-zinc-700">
-              Check-in hasn&apos;t opened yet. It opens at{" "}
-              {new Date(activity.opens_at).toLocaleString()}.
-            </p>
+            <h1 className="font-heading text-lg font-semibold text-neutral-900">{activity.title}</h1>
+            <Alert tone="info" className="mt-3">
+              Check-in hasn&apos;t opened yet. It opens at {new Date(activity.opens_at).toLocaleString()}.
+            </Alert>
           </>
         ) : (
           <>
-            <h1 className="text-lg font-semibold text-zinc-900">{activity.title}</h1>
-            <p className="mt-1 text-sm text-zinc-500">Enter the keyword you were given to check in.</p>
+            <h1 className="font-heading text-lg font-semibold text-neutral-900">{activity.title}</h1>
+            <p className="mt-1 text-sm text-neutral-500">Enter the keyword you were given to check in.</p>
             <CheckinForm token={token} members={members} />
           </>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

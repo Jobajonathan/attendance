@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 import { closeActivity, reopenActivity } from "./actions";
+import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 
 export function CloseActivityButton({ activityId }: { activityId: string }) {
   const boundAction = closeActivity.bind(null, activityId);
@@ -16,14 +18,14 @@ export function CloseActivityButton({ activityId }: { activityId: string }) {
         }
       }}
     >
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm text-white hover:bg-zinc-800 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={pending} size="sm">
         {pending ? "Closing..." : "Close now"}
-      </button>
-      {state?.error && <p className="mt-1 text-sm text-red-600">{state.error}</p>}
+      </Button>
+      {state?.error && (
+        <Alert tone="error" className="mt-1">
+          {state.error}
+        </Alert>
+      )}
     </form>
   );
 }
@@ -36,7 +38,7 @@ export function ReopenActivityButton({ activityId }: { activityId: string }) {
     <form action={formAction} className="space-y-2">
       {state?.reasonRequired && (
         <div className="space-y-1">
-          <label htmlFor="reason" className="text-sm font-medium text-zinc-700">
+          <label htmlFor="reason" className="text-sm font-medium text-neutral-700">
             Reason (required — this activity closed on a different day)
           </label>
           <textarea
@@ -44,18 +46,14 @@ export function ReopenActivityButton({ activityId }: { activityId: string }) {
             name="reason"
             required
             rows={2}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
+            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
           />
         </div>
       )}
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100 disabled:opacity-50"
-      >
+      <Button type="submit" variant="secondary" size="sm" disabled={pending}>
         {pending ? "Reopening..." : "Reopen"}
-      </button>
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+      </Button>
+      {state?.error && <Alert tone="error">{state.error}</Alert>}
     </form>
   );
 }

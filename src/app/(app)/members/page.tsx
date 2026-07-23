@@ -2,6 +2,18 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
 import { deriveMemberStatus, MEMBER_STATUS_LABELS } from "@/lib/member-status";
+import { PageHeader } from "@/components/ui/page-header";
+import { LinkButton } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge, type BadgeTone } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
+
+const MEMBER_STATUS_TONE: Record<string, BadgeTone> = {
+  active: "success",
+  on_leave: "warning",
+  inactive: "neutral",
+  transferred: "neutral",
+};
 
 export default async function MembersPage({
   searchParams,
@@ -22,25 +34,21 @@ export default async function MembersPage({
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-zinc-900">Member Directory</h1>
-        {canManage && (
-          <div className="flex gap-2">
-            <Link
-              href="/members/import"
-              className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100"
-            >
-              Import from Google Sheets
-            </Link>
-            <Link
-              href="/members/new"
-              className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm text-white hover:bg-zinc-800"
-            >
-              Add member
-            </Link>
-          </div>
-        )}
-      </div>
+      <PageHeader
+        title="Member Directory"
+        action={
+          canManage && (
+            <div className="flex gap-2">
+              <LinkButton href="/members/import" variant="secondary" size="sm">
+                Import from Google Sheets
+              </LinkButton>
+              <LinkButton href="/members/new" size="sm">
+                Add member
+              </LinkButton>
+            </div>
+          )
+        }
+      />
 
       <form method="get" className="mt-4">
         <input
@@ -48,15 +56,19 @@ export default async function MembersPage({
           name="q"
           defaultValue={q ?? ""}
           placeholder="Search by name..."
-          className="w-full max-w-sm rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
+          className="w-full max-w-sm rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
         />
       </form>
 
-      {error && <p className="mt-4 text-sm text-red-600">{error.message}</p>}
+      {error && (
+        <Alert tone="error" className="mt-4">
+          {error.message}
+        </Alert>
+      )}
 
-      <div className="mt-4 overflow-hidden rounded-lg border border-zinc-200 bg-white">
-        <table className="min-w-full divide-y divide-zinc-200 text-sm">
-          <thead className="bg-zinc-50 text-left text-xs font-medium uppercase tracking-wide text-zinc-500">
+      <Card className="mt-4 overflow-hidden">
+        <table className="min-w-full divide-y divide-neutral-200 text-sm">
+          <thead className="bg-neutral-50 text-left text-xs font-medium uppercase tracking-wide text-neutral-500">
             <tr>
               <th className="px-4 py-2">Name</th>
               <th className="px-4 py-2">Joined</th>
@@ -64,31 +76,34 @@ export default async function MembersPage({
               <th className="px-4 py-2">Phone</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100">
-            {members?.map((member) => (
-              <tr key={member.id} className="hover:bg-zinc-50">
-                <td className="px-4 py-2">
-                  <Link href={`/members/${member.id}`} className="font-medium text-zinc-900 hover:underline">
-                    {member.name}
-                  </Link>
-                </td>
-                <td className="px-4 py-2 text-zinc-500">{member.join_date}</td>
-                <td className="px-4 py-2 text-zinc-500">
-                  {MEMBER_STATUS_LABELS[deriveMemberStatus(member)]}
-                </td>
-                <td className="px-4 py-2 text-zinc-500">{member.phone_number ?? "—"}</td>
-              </tr>
-            ))}
+          <tbody className="divide-y divide-neutral-100">
+            {members?.map((member) => {
+              const status = deriveMemberStatus(member);
+              return (
+                <tr key={member.id} className="hover:bg-neutral-50">
+                  <td className="px-4 py-2">
+                    <Link href={`/members/${member.id}`} className="font-medium text-neutral-900 hover:text-brand">
+                      {member.name}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2 text-neutral-500">{member.join_date}</td>
+                  <td className="px-4 py-2">
+                    <Badge tone={MEMBER_STATUS_TONE[status]}>{MEMBER_STATUS_LABELS[status]}</Badge>
+                  </td>
+                  <td className="px-4 py-2 text-neutral-500">{member.phone_number ?? "—"}</td>
+                </tr>
+              );
+            })}
             {members?.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-zinc-400">
+                <td colSpan={4} className="px-4 py-6 text-center text-neutral-400">
                   No members found.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-      </div>
+      </Card>
     </div>
   );
 }

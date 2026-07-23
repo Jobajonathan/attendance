@@ -271,6 +271,13 @@ export type Database = {
           type: Database["public"]["Enums"]["activity_type"]
         }[]
       }
+      get_open_checkin_link: {
+        Args: never
+        Returns: {
+          link_token: string
+          title: string
+        }[]
+      }
       list_checkin_members: {
         Args: { p_link_token: string }
         Returns: {
