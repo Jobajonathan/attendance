@@ -5,6 +5,7 @@ import { requireProfile } from "@/lib/current-profile";
 import { CloseActivityButton, ReopenActivityButton } from "./activity-actions";
 import { Card } from "@/components/ui/card";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
+import { LinkButton } from "@/components/ui/button";
 
 const ACTIVITY_STATUS_TONE: Record<string, BadgeTone> = {
   scheduled: "neutral",
@@ -74,6 +75,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
   const submissionUrl = `${origin}/${isReview ? "review" : "checkin"}/${activity.link_token}`;
   const canClose = ["administrative_officer", "head_of_department"].includes(profile.role);
   const canReopen = profile.role === "head_of_department";
+  const canEdit = profile.role === "administrative_officer";
 
   const presentCount = submissions?.filter((s) => s.status === "present").length ?? 0;
   const absentCount = submissions?.filter((s) => s.status === "absent").length ?? 0;
@@ -102,7 +104,12 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
         </Card>
       )}
 
-      <div className="mt-4 flex gap-6">
+      <div className="mt-4 flex items-center gap-6">
+        {canEdit && (
+          <LinkButton href={`/activities/${activity.id}/edit`} variant="secondary" size="sm">
+            Edit
+          </LinkButton>
+        )}
         {canClose && activity.status !== "closed" && <CloseActivityButton activityId={activity.id} />}
         {canReopen && activity.status === "closed" && <ReopenActivityButton activityId={activity.id} />}
       </div>

@@ -23,6 +23,7 @@ export type Database = {
           id: string
           is_backfilled: boolean
           keyword: string
+          keyword_no_location: string | null
           link_token: string
           location_lat: number | null
           location_lng: number | null
@@ -40,6 +41,7 @@ export type Database = {
           id?: string
           is_backfilled?: boolean
           keyword: string
+          keyword_no_location?: string | null
           link_token?: string
           location_lat?: number | null
           location_lng?: number | null
@@ -57,6 +59,7 @@ export type Database = {
           id?: string
           is_backfilled?: boolean
           keyword?: string
+          keyword_no_location?: string | null
           link_token?: string
           location_lat?: number | null
           location_lng?: number | null
@@ -124,6 +127,7 @@ export type Database = {
           id: string
           join_date: string
           join_reason: string | null
+          marital_status: string | null
           name: string
           occupation: string | null
           phone_number: string | null
@@ -132,6 +136,7 @@ export type Database = {
           status_manual:
             | Database["public"]["Enums"]["member_status_manual"]
             | null
+          status_reason: string | null
           updated_at: string
         }
         Insert: {
@@ -143,6 +148,7 @@ export type Database = {
           id?: string
           join_date?: string
           join_reason?: string | null
+          marital_status?: string | null
           name: string
           occupation?: string | null
           phone_number?: string | null
@@ -151,6 +157,7 @@ export type Database = {
           status_manual?:
             | Database["public"]["Enums"]["member_status_manual"]
             | null
+          status_reason?: string | null
           updated_at?: string
         }
         Update: {
@@ -162,6 +169,7 @@ export type Database = {
           id?: string
           join_date?: string
           join_reason?: string | null
+          marital_status?: string | null
           name?: string
           occupation?: string | null
           phone_number?: string | null
@@ -170,6 +178,7 @@ export type Database = {
           status_manual?:
             | Database["public"]["Enums"]["member_status_manual"]
             | null
+          status_reason?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -335,6 +344,7 @@ export type Database = {
           p_link_token: string
           p_lng?: number
           p_member_id: string
+          p_no_location?: boolean
         }
         Returns: {
           geofence_outcome: Database["public"]["Enums"]["geofence_outcome"]
