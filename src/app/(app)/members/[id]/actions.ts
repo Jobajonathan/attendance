@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
 import { canManageOperations } from "@/lib/roles";
+import type { Tables } from "@/lib/supabase/database.types";
 
 export async function updateMember(
   memberId: string,
@@ -35,7 +36,7 @@ export async function updateMember(
       anniversary_date: String(formData.get("anniversary_date") ?? "") || null,
       residential_address: String(formData.get("residential_address") ?? "").trim() || null,
       join_reason: String(formData.get("join_reason") ?? "").trim() || null,
-      status_manual: statusManual === "" ? null : (statusManual as "active" | "transferred" | "inactive"),
+      status_manual: statusManual === "" ? null : (statusManual as Tables<"members">["status_manual"]),
       status_reason: String(formData.get("status_reason") ?? "").trim() || null,
     })
     .eq("id", memberId);
