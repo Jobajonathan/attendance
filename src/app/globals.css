@@ -3,11 +3,20 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Light Nation / ProtocolOS brand: vibrant orange as an accent color only
+     (buttons, links, active states) — never a large background or wash. */
+  --color-brand: #ff4500;
+  --color-brand-hover: #e03d00;
+  --color-brand-foreground: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand: var(--color-brand);
+  --color-brand-hover: var(--color-brand-hover);
+  --color-brand-foreground: var(--color-brand-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

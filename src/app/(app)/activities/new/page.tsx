@@ -2,16 +2,20 @@
 
 import { useActionState } from "react";
 import { createActivity } from "./actions";
+import { Field } from "@/components/ui/field";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default function NewActivityPage() {
   const [state, formAction, pending] = useActionState(createActivity, null);
 
   return (
     <div className="max-w-lg">
-      <h1 className="text-2xl font-semibold text-zinc-900">New attendance activity</h1>
-      <p className="mt-1 text-sm text-zinc-500">
-        A unique keyword and check-in link are generated automatically once you save.
-      </p>
+      <PageHeader
+        title="New attendance activity"
+        description="A unique keyword and check-in link are generated automatically once you save."
+      />
 
       <form action={formAction} className="mt-6 space-y-4">
         <Field label="Title" name="title" type="text" placeholder="Sunday First Service" required />
@@ -19,11 +23,11 @@ export default function NewActivityPage() {
         <Field label="Opens at" name="opens_at" type="datetime-local" required />
         <Field label="Closes at" name="closes_at" type="datetime-local" required />
 
-        <fieldset className="space-y-4 rounded-md border border-zinc-200 p-4">
-          <legend className="px-1 text-sm font-medium text-zinc-700">
+        <fieldset className="space-y-4 rounded-md border border-slate-200 p-4">
+          <legend className="px-1 text-sm font-medium text-slate-700">
             Location &amp; geofence (optional)
           </legend>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-slate-500">
             Leave blank to skip geofence checking for this activity — check-ins are never blocked
             by location either way, this only affects whether they get flagged for review.
           </p>
@@ -32,49 +36,12 @@ export default function NewActivityPage() {
           <Field label="Radius (meters)" name="geofence_radius_m" type="number" />
         </fieldset>
 
-        {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+        {state?.error && <Alert tone="error">{state.error}</Alert>}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={pending}>
           {pending ? "Creating..." : "Create activity"}
-        </button>
+        </Button>
       </form>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  name,
-  type,
-  required,
-  placeholder,
-  step,
-}: {
-  label: string;
-  name: string;
-  type: string;
-  required?: boolean;
-  placeholder?: string;
-  step?: string;
-}) {
-  return (
-    <div className="space-y-1">
-      <label htmlFor={name} className="text-sm font-medium text-zinc-700">
-        {label}
-      </label>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        required={required}
-        placeholder={placeholder}
-        step={step}
-        className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
-      />
     </div>
   );
 }
