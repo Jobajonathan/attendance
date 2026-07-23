@@ -7,6 +7,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -121,9 +123,12 @@ export type Database = {
           gender: string | null
           id: string
           join_date: string
+          join_reason: string | null
           name: string
+          occupation: string | null
           phone_number: string | null
           photo_url: string | null
+          residential_address: string | null
           status_manual:
             | Database["public"]["Enums"]["member_status_manual"]
             | null
@@ -137,9 +142,12 @@ export type Database = {
           gender?: string | null
           id?: string
           join_date?: string
+          join_reason?: string | null
           name: string
+          occupation?: string | null
           phone_number?: string | null
           photo_url?: string | null
+          residential_address?: string | null
           status_manual?:
             | Database["public"]["Enums"]["member_status_manual"]
             | null
@@ -153,9 +161,12 @@ export type Database = {
           gender?: string | null
           id?: string
           join_date?: string
+          join_reason?: string | null
           name?: string
+          occupation?: string | null
           phone_number?: string | null
           photo_url?: string | null
+          residential_address?: string | null
           status_manual?:
             | Database["public"]["Enums"]["member_status_manual"]
             | null
@@ -174,22 +185,28 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          email: string | null
           full_name: string
           id: string
+          is_active: boolean
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string
         }
         Insert: {
           created_at?: string
+          email?: string | null
           full_name: string
           id: string
+          is_active?: boolean
           role: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
         Update: {
           created_at?: string
+          email?: string | null
           full_name?: string
           id?: string
+          is_active?: boolean
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }

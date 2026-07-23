@@ -25,6 +25,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <Link href="/members" className="text-neutral-600 hover:text-brand">
                 Member Directory
               </Link>
+              {leadership && (
+                <Link href="/staff" className="text-neutral-600 hover:text-brand">
+                  Staff
+                </Link>
+              )}
             </nav>
           </div>
           <div className="flex items-center gap-3 text-sm text-neutral-600">
