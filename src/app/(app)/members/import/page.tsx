@@ -11,10 +11,10 @@ export default function ImportMembersPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-semibold text-slate-900">Import from Google Sheets</h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <h1 className="font-heading text-2xl font-semibold text-neutral-900">Import from Google Sheets</h1>
+      <p className="mt-2 text-sm text-neutral-600">
         Export the department&apos;s member sheet as CSV with columns{" "}
-        <code className="rounded bg-slate-100 px-1">name, phone_number, gender, join_date, birthday, anniversary_date</code>{" "}
+        <code className="rounded bg-neutral-100 px-1">name, phone_number, gender, join_date, birthday, anniversary_date</code>{" "}
         (dates as YYYY-MM-DD). Rows missing a name are skipped and reported below rather than
         blocking the rest of the import; rows matching an existing member by name are held for
         manual review rather than created automatically.
@@ -26,7 +26,7 @@ export default function ImportMembersPage() {
           name="file"
           accept=".csv"
           required
-          className="block text-sm text-slate-700 file:mr-3 file:rounded-md file:border-0 file:bg-brand file:px-3 file:py-2 file:text-sm file:text-brand-foreground"
+          className="block text-sm text-neutral-700 file:mr-3 file:rounded-md file:border-0 file:bg-brand file:px-3 file:py-2 file:text-sm file:text-brand-foreground"
         />
 
         {state?.error && <Alert tone="error">{state.error}</Alert>}
@@ -44,8 +44,8 @@ export default function ImportMembersPage() {
 
           {state.skipped && state.skipped.length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold text-slate-900">Skipped rows</h2>
-              <ul className="mt-2 space-y-1 text-sm text-slate-600">
+              <h2 className="font-heading text-sm font-semibold text-neutral-900">Skipped rows</h2>
+              <ul className="mt-2 space-y-1 text-sm text-neutral-600">
                 {state.skipped.map((s) => (
                   <li key={s.row}>
                     Row {s.row}: {s.reason}
@@ -57,15 +57,15 @@ export default function ImportMembersPage() {
 
           {state.held && state.held.length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold text-slate-900">Held for manual review</h2>
-              <ul className="mt-2 space-y-1 text-sm text-slate-600">
+              <h2 className="font-heading text-sm font-semibold text-neutral-900">Held for manual review</h2>
+              <ul className="mt-2 space-y-1 text-sm text-neutral-600">
                 {state.held.map((h) => (
                   <li key={h.row}>
                     Row {h.row} ({h.name}): {h.reason}
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-neutral-500">
                 Add any of these individually from the{" "}
                 <Link href="/members/new" className="text-brand underline">
                   Add member

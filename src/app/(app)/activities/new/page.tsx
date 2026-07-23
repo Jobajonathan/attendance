@@ -23,11 +23,11 @@ export default function NewActivityPage() {
         <Field label="Opens at" name="opens_at" type="datetime-local" required />
         <Field label="Closes at" name="closes_at" type="datetime-local" required />
 
-        <fieldset className="space-y-4 rounded-md border border-slate-200 p-4">
-          <legend className="px-1 text-sm font-medium text-slate-700">
+        <fieldset className="space-y-4 rounded-md border border-neutral-200 p-4">
+          <legend className="px-1 text-sm font-medium text-neutral-700">
             Location &amp; geofence (optional)
           </legend>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-neutral-500">
             Leave blank to skip geofence checking for this activity — check-ins are never blocked
             by location either way, this only affects whether they get flagged for review.
           </p>

@@ -94,13 +94,13 @@ export function CheckinForm({ token, members }: { token: string; members: Member
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
       <div className="space-y-1">
-        <label htmlFor="member-search" className="text-sm font-medium text-slate-700">
+        <label htmlFor="member-search" className="text-sm font-medium text-neutral-700">
           Your name
         </label>
         {selected ? (
-          <div className="flex items-center justify-between rounded-md border border-slate-300 px-3 py-2 text-sm">
+          <div className="flex items-center justify-between rounded-md border border-neutral-300 px-3 py-2 text-sm">
             <span>
-              {selected.name} <span className="text-slate-400">— joined {selected.join_date}</span>
+              {selected.name} <span className="text-neutral-400">— joined {selected.join_date}</span>
             </span>
             <button
               type="button"
@@ -122,18 +122,18 @@ export function CheckinForm({ token, members }: { token: string; members: Member
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Start typing your name..."
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
             />
             {matches.length > 0 && (
-              <ul className="mt-1 divide-y divide-slate-100 rounded-md border border-slate-200">
+              <ul className="mt-1 divide-y divide-neutral-100 rounded-md border border-neutral-200">
                 {matches.map((m) => (
                   <li key={m.id}>
                     <button
                       type="button"
                       onClick={() => setSelected(m)}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50"
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-50"
                     >
-                      {m.name} <span className="text-slate-400">— joined {m.join_date}</span>
+                      {m.name} <span className="text-neutral-400">— joined {m.join_date}</span>
                     </button>
                   </li>
                 ))}
@@ -144,7 +144,7 @@ export function CheckinForm({ token, members }: { token: string; members: Member
       </div>
 
       <div className="space-y-1">
-        <label htmlFor="keyword" className="text-sm font-medium text-slate-700">
+        <label htmlFor="keyword" className="text-sm font-medium text-neutral-700">
           Session keyword
         </label>
         <input
@@ -153,7 +153,7 @@ export function CheckinForm({ token, members }: { token: string; members: Member
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           required
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm uppercase focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm uppercase focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
         />
       </div>
 

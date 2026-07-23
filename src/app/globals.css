@@ -1,31 +1,67 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fffbf8;
+  --foreground: #2b211c;
 
-  /* Light Nation / ProtocolOS brand: vibrant orange as an accent color only
-     (buttons, links, active states) — never a large background or wash. */
+  /* Light Nation / ProtocolOS brand, taken from the shared design (the
+     "classical" design system export): warm cream background, warm dark
+     text, and a full orange accent scale — not pure white/black or a cool
+     gray. Orange is used as an accent only (buttons, links, active states),
+     never a large background. */
+  --color-brand-100: #ffede3;
+  --color-brand-200: #ffd4bd;
+  --color-brand-300: #ffb088;
+  --color-brand-400: #ff8752;
   --color-brand: #ff4500;
   --color-brand-hover: #e03d00;
+  --color-brand-700: #b23100;
+  --color-brand-800: #7a2200;
+  --color-brand-900: #4a1500;
   --color-brand-foreground: #ffffff;
+
+  /* Warm neutral scale (not Tailwind's cool slate/zinc) anchored at the
+     design's cream background (50) and warm near-black text (900). */
+  --color-neutral-50: #fffbf8;
+  --color-neutral-100: #faf3ed;
+  --color-neutral-200: #f0e6dc;
+  --color-neutral-300: #e0d2c4;
+  --color-neutral-400: #c7b2a0;
+  --color-neutral-500: #a68f7c;
+  --color-neutral-600: #8a7362;
+  --color-neutral-700: #6b584a;
+  --color-neutral-800: #453830;
+  --color-neutral-900: #2b211c;
+
+  --font-heading: Georgia, "Times New Roman", serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand-100: var(--color-brand-100);
+  --color-brand-200: var(--color-brand-200);
+  --color-brand-300: var(--color-brand-300);
+  --color-brand-400: var(--color-brand-400);
   --color-brand: var(--color-brand);
   --color-brand-hover: var(--color-brand-hover);
+  --color-brand-700: var(--color-brand-700);
+  --color-brand-800: var(--color-brand-800);
+  --color-brand-900: var(--color-brand-900);
   --color-brand-foreground: var(--color-brand-foreground);
+  --color-neutral-50: var(--color-neutral-50);
+  --color-neutral-100: var(--color-neutral-100);
+  --color-neutral-200: var(--color-neutral-200);
+  --color-neutral-300: var(--color-neutral-300);
+  --color-neutral-400: var(--color-neutral-400);
+  --color-neutral-500: var(--color-neutral-500);
+  --color-neutral-600: var(--color-neutral-600);
+  --color-neutral-700: var(--color-neutral-700);
+  --color-neutral-800: var(--color-neutral-800);
+  --color-neutral-900: var(--color-neutral-900);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-heading: var(--font-heading);
 }
 
 body {

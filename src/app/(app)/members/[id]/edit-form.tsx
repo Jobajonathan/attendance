@@ -46,7 +46,7 @@ export default function EditMemberForm({
       />
 
       <div className="space-y-1">
-        <label htmlFor="status_manual" className="text-sm font-medium text-slate-700">
+        <label htmlFor="status_manual" className="text-sm font-medium text-neutral-700">
           Status override
         </label>
         <select
@@ -54,7 +54,7 @@ export default function EditMemberForm({
           name="status_manual"
           defaultValue={member.status_manual ?? ""}
           disabled={!canManage}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand disabled:bg-slate-100"
+          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand disabled:bg-neutral-100"
         >
           <option value="">Active (no override)</option>
           <option value="transferred">Transferred</option>

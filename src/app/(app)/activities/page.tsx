@@ -10,7 +10,7 @@ import { Alert } from "@/components/ui/alert";
 
 const STATUS_TONE: Record<string, BadgeTone> = {
   scheduled: "neutral",
-  open: "success",
+  open: "brand",
   closed: "neutral",
 };
 
@@ -46,8 +46,8 @@ export default async function ActivitiesPage() {
       )}
 
       <Card className="mt-4 overflow-hidden">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+        <table className="min-w-full divide-y divide-neutral-200 text-sm">
+          <thead className="bg-neutral-50 text-left text-xs font-medium uppercase tracking-wide text-neutral-500">
             <tr>
               <th className="px-4 py-2">Title</th>
               <th className="px-4 py-2">Scheduled</th>
@@ -56,16 +56,16 @@ export default async function ActivitiesPage() {
               <th className="px-4 py-2">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-neutral-100">
             {activities?.map((activity) => {
               // Section 3.3 edge case: an Open activity past its closing time that
               // hasn't been picked up by the sync job yet is flagged, not silently
               // auto-closed, so a late-arriving submission isn't discarded unnoticed.
               const staleOpen = activity.status === "open" && new Date(activity.closes_at).getTime() < now;
               return (
-                <tr key={activity.id} className="hover:bg-slate-50">
+                <tr key={activity.id} className="hover:bg-neutral-50">
                   <td className="px-4 py-2">
-                    <Link href={`/activities/${activity.id}`} className="font-medium text-slate-900 hover:text-brand">
+                    <Link href={`/activities/${activity.id}`} className="font-medium text-neutral-900 hover:text-brand">
                       {activity.title}
                     </Link>
                     {activity.is_backfilled && (
@@ -74,9 +74,9 @@ export default async function ActivitiesPage() {
                       </Badge>
                     )}
                   </td>
-                  <td className="px-4 py-2 text-slate-500">{activity.scheduled_date}</td>
-                  <td className="px-4 py-2 text-slate-500">{new Date(activity.opens_at).toLocaleString()}</td>
-                  <td className="px-4 py-2 text-slate-500">{new Date(activity.closes_at).toLocaleString()}</td>
+                  <td className="px-4 py-2 text-neutral-500">{activity.scheduled_date}</td>
+                  <td className="px-4 py-2 text-neutral-500">{new Date(activity.opens_at).toLocaleString()}</td>
+                  <td className="px-4 py-2 text-neutral-500">{new Date(activity.closes_at).toLocaleString()}</td>
                   <td className="px-4 py-2">
                     <Badge tone={STATUS_TONE[activity.status]}>{activity.status}</Badge>
                     {staleOpen && (
@@ -90,7 +90,7 @@ export default async function ActivitiesPage() {
             })}
             {activities?.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={5} className="px-4 py-6 text-center text-neutral-400">
                   No activities yet.
                 </td>
               </tr>

@@ -56,7 +56,7 @@ export default async function MembersPage({
           name="q"
           defaultValue={q ?? ""}
           placeholder="Search by name..."
-          className="w-full max-w-sm rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+          className="w-full max-w-sm rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
         />
       </form>
 
@@ -67,8 +67,8 @@ export default async function MembersPage({
       )}
 
       <Card className="mt-4 overflow-hidden">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+        <table className="min-w-full divide-y divide-neutral-200 text-sm">
+          <thead className="bg-neutral-50 text-left text-xs font-medium uppercase tracking-wide text-neutral-500">
             <tr>
               <th className="px-4 py-2">Name</th>
               <th className="px-4 py-2">Joined</th>
@@ -76,27 +76,27 @@ export default async function MembersPage({
               <th className="px-4 py-2">Phone</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-neutral-100">
             {members?.map((member) => {
               const status = deriveMemberStatus(member);
               return (
-                <tr key={member.id} className="hover:bg-slate-50">
+                <tr key={member.id} className="hover:bg-neutral-50">
                   <td className="px-4 py-2">
-                    <Link href={`/members/${member.id}`} className="font-medium text-slate-900 hover:text-brand">
+                    <Link href={`/members/${member.id}`} className="font-medium text-neutral-900 hover:text-brand">
                       {member.name}
                     </Link>
                   </td>
-                  <td className="px-4 py-2 text-slate-500">{member.join_date}</td>
+                  <td className="px-4 py-2 text-neutral-500">{member.join_date}</td>
                   <td className="px-4 py-2">
                     <Badge tone={MEMBER_STATUS_TONE[status]}>{MEMBER_STATUS_LABELS[status]}</Badge>
                   </td>
-                  <td className="px-4 py-2 text-slate-500">{member.phone_number ?? "—"}</td>
+                  <td className="px-4 py-2 text-neutral-500">{member.phone_number ?? "—"}</td>
                 </tr>
               );
             })}
             {members?.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={4} className="px-4 py-6 text-center text-neutral-400">
                   No members found.
                 </td>
               </tr>

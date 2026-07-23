@@ -9,7 +9,7 @@ const base =
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-brand text-brand-foreground hover:bg-brand-hover",
-  secondary: "border border-slate-300 text-slate-700 hover:bg-slate-100",
+  secondary: "border border-neutral-300 text-neutral-700 hover:bg-neutral-100",
   danger: "bg-red-600 text-white hover:bg-red-700",
 };
 

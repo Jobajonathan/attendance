@@ -8,12 +8,12 @@ import { Badge, type BadgeTone } from "@/components/ui/badge";
 
 const ACTIVITY_STATUS_TONE: Record<string, BadgeTone> = {
   scheduled: "neutral",
-  open: "success",
+  open: "brand",
   closed: "neutral",
 };
 
 const SUBMISSION_STATUS_TONE: Record<string, BadgeTone> = {
-  present: "success",
+  present: "brand",
   absent: "danger",
   excused: "warning",
 };
@@ -59,8 +59,8 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-slate-900">{activity.title}</h1>
-      <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+      <h1 className="font-heading text-2xl font-semibold text-neutral-900">{activity.title}</h1>
+      <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-neutral-500">
         <span>
           {activity.scheduled_date} &middot; {new Date(activity.opens_at).toLocaleString()} &ndash;{" "}
           {new Date(activity.closes_at).toLocaleString()}
@@ -71,8 +71,8 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
 
       {activity.status !== "closed" && (
         <Card className="mt-4 p-4">
-          <p className="text-sm font-medium text-slate-700">Check-in keyword: {activity.keyword}</p>
-          <p className="mt-1 break-all text-sm text-slate-600">
+          <p className="text-sm font-medium text-neutral-700">Check-in keyword: {activity.keyword}</p>
+          <p className="mt-1 break-all text-sm text-neutral-600">
             Link: <a href={checkinUrl} className="text-brand underline">{checkinUrl}</a>
           </p>
         </Card>
@@ -83,12 +83,12 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
         {canReopen && activity.status === "closed" && <ReopenActivityButton activityId={activity.id} />}
       </div>
 
-      <h2 className="mt-8 text-lg font-semibold text-slate-900">
+      <h2 className="font-heading mt-8 text-lg font-semibold text-neutral-900">
         Roster {submissions ? `(${presentCount} present, ${absentCount} absent)` : ""}
       </h2>
       <Card className="mt-2 overflow-hidden">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+        <table className="min-w-full divide-y divide-neutral-200 text-sm">
+          <thead className="bg-neutral-50 text-left text-xs font-medium uppercase tracking-wide text-neutral-500">
             <tr>
               <th className="px-4 py-2">Member</th>
               <th className="px-4 py-2">Status</th>
@@ -96,14 +96,14 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
               <th className="px-4 py-2">Geofence</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-neutral-100">
             {submissions?.map((s) => (
               <tr key={s.id}>
-                <td className="px-4 py-2 text-slate-900">{s.members?.name}</td>
+                <td className="px-4 py-2 text-neutral-900">{s.members?.name}</td>
                 <td className="px-4 py-2">
                   <Badge tone={SUBMISSION_STATUS_TONE[s.status]}>{s.status}</Badge>
                 </td>
-                <td className="px-4 py-2 text-slate-500">{new Date(s.submitted_at).toLocaleString()}</td>
+                <td className="px-4 py-2 text-neutral-500">{new Date(s.submitted_at).toLocaleString()}</td>
                 <td className="px-4 py-2">
                   {s.geofence_outcome && <Badge tone={GEOFENCE_TONE[s.geofence_outcome]}>{s.geofence_outcome}</Badge>}
                 </td>
@@ -111,7 +111,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
             ))}
             {(!submissions || submissions.length === 0) && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={4} className="px-4 py-6 text-center text-neutral-400">
                   {activity.status === "closed" ? "No one checked in." : "No check-ins yet."}
                 </td>
               </tr>
@@ -122,8 +122,8 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
 
       {auditEntries && auditEntries.length > 0 && (
         <>
-          <h2 className="mt-8 text-lg font-semibold text-slate-900">Audit log</h2>
-          <ul className="mt-2 space-y-1 text-sm text-slate-600">
+          <h2 className="font-heading mt-8 text-lg font-semibold text-neutral-900">Audit log</h2>
+          <ul className="mt-2 space-y-1 text-sm text-neutral-600">
             {auditEntries.map((entry) => (
               <li key={entry.id}>
                 {new Date(entry.created_at).toLocaleString()} &mdash; {entry.action} by{" "}

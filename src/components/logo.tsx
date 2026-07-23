@@ -22,7 +22,7 @@ export function Logo({ size = 32, className = "" }: { size?: number; className?:
   }
 
   return (
-    <span className={`font-semibold text-slate-900 ${className}`} style={{ fontSize: size * 0.5 }}>
+    <span className={`font-heading font-semibold text-neutral-900 ${className}`} style={{ fontSize: size * 0.5 }}>
       Protocol<span className="text-brand">OS</span>
     </span>
   );
