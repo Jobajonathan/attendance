@@ -21,6 +21,7 @@ export async function updateMember(
     return { error: "Name is required." };
   }
 
+  const maritalStatus = String(formData.get("marital_status") ?? "").trim();
   const statusManual = String(formData.get("status_manual") ?? "");
 
   const supabase = await createClient();
@@ -31,13 +32,22 @@ export async function updateMember(
       phone_number: String(formData.get("phone_number") ?? "").trim() || null,
       occupation: String(formData.get("occupation") ?? "").trim() || null,
       gender: String(formData.get("gender") ?? "").trim() || null,
-      marital_status: String(formData.get("marital_status") ?? "").trim() || null,
+      marital_status: maritalStatus || null,
       birthday: String(formData.get("birthday") ?? "") || null,
-      anniversary_date: String(formData.get("anniversary_date") ?? "") || null,
+      // The wedding-anniversary field only renders (and is only submitted)
+      // when marital_status is "married" — leave any existing value alone
+      // rather than wiping it when the field isn't part of this submission.
+      ...(maritalStatus === "married"
+        ? { anniversary_date: String(formData.get("anniversary_date") ?? "") || null }
+        : {}),
       residential_address: String(formData.get("residential_address") ?? "").trim() || null,
       join_reason: String(formData.get("join_reason") ?? "").trim() || null,
       status_manual: statusManual === "" ? null : (statusManual as Tables<"members">["status_manual"]),
-      status_reason: String(formData.get("status_reason") ?? "").trim() || null,
+      // Same reasoning as anniversary_date: status_reason only renders when
+      // status_manual is "other".
+      ...(statusManual === "other"
+        ? { status_reason: String(formData.get("status_reason") ?? "").trim() || null }
+        : {}),
     })
     .eq("id", memberId);
 

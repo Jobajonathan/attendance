@@ -1,15 +1,19 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { createActivity } from "./actions";
 import { Field } from "@/components/ui/field";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
+import { ACTIVITY_TITLE_PRESETS } from "@/lib/activity-presets";
 
 export default function NewActivityPage() {
   const [state, formAction, pending] = useActionState(createActivity, null);
-  const [type, setType] = useState<"attendance" | "message_review">("attendance");
+  const searchParams = useSearchParams();
+  const initialType = searchParams.get("type") === "message_review" ? "message_review" : "attendance";
+  const [type, setType] = useState<"attendance" | "message_review">(initialType);
 
   return (
     <div className="max-w-lg">
@@ -47,7 +51,12 @@ export default function NewActivityPage() {
           </div>
         </div>
 
-        <Field label="Title" name="title" type="text" placeholder="Sunday First Service" required />
+        <Field label="Title" name="title" type="text" placeholder="Sunday First Service" required list="title-presets" />
+        <datalist id="title-presets">
+          {ACTIVITY_TITLE_PRESETS.map((preset) => (
+            <option key={preset} value={preset} />
+          ))}
+        </datalist>
         <Field label="Scheduled date" name="scheduled_date" type="date" required />
         <Field label="Opens at" name="opens_at" type="datetime-local" required />
         <Field label="Closes at" name="closes_at" type="datetime-local" required />
@@ -74,8 +83,8 @@ export default function NewActivityPage() {
             </label>
             <p className="text-xs text-neutral-500">
               Optional. Members who can&apos;t share their location can check the &quot;I&apos;m unable
-              to share my location&quot; box and use this keyword instead of the regular one. Leave
-              blank if this activity shouldn&apos;t offer a no-location fallback.
+              to share my location&quot; box instead — their identity is confirmed verbally rather than
+              by keyword, so this field is just a record of what you tell them to use, if anything.
             </p>
             <input
               id="keyword_no_location"
