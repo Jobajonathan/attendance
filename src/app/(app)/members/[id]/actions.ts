@@ -27,9 +27,12 @@ export async function updateMember(
     .update({
       name,
       phone_number: String(formData.get("phone_number") ?? "").trim() || null,
+      occupation: String(formData.get("occupation") ?? "").trim() || null,
       gender: String(formData.get("gender") ?? "").trim() || null,
       birthday: String(formData.get("birthday") ?? "") || null,
       anniversary_date: String(formData.get("anniversary_date") ?? "") || null,
+      residential_address: String(formData.get("residential_address") ?? "").trim() || null,
+      join_reason: String(formData.get("join_reason") ?? "").trim() || null,
       status_manual: statusManual === "" ? null : (statusManual as "active" | "transferred" | "inactive"),
     })
     .eq("id", memberId);

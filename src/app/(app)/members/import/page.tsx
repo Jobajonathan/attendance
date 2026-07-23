@@ -14,10 +14,14 @@ export default function ImportMembersPage() {
       <h1 className="font-heading text-2xl font-semibold text-neutral-900">Import from Google Sheets</h1>
       <p className="mt-2 text-sm text-neutral-600">
         Export the department&apos;s member sheet as CSV with columns{" "}
-        <code className="rounded bg-neutral-100 px-1">name, phone_number, gender, join_date, birthday, anniversary_date</code>{" "}
-        (dates as YYYY-MM-DD). Rows missing a name are skipped and reported below rather than
-        blocking the rest of the import; rows matching an existing member by name are held for
-        manual review rather than created automatically.
+        <code className="rounded bg-neutral-100 px-1">
+          name, phone_number, occupation, gender, join_date, birthday, anniversary_date,
+          residential_address, join_reason
+        </code>{" "}
+        (name and phone_number required, the rest optional). Dates as YYYY-MM-DD; birthday also
+        accepts M/D or MM/DD if you don&apos;t have a year on file. Rows missing a name are
+        skipped and reported below rather than blocking the rest of the import; rows matching an
+        existing member by name are held for manual review rather than created automatically.
       </p>
 
       <form action={formAction} className="mt-6 space-y-4">
