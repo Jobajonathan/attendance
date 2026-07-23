@@ -37,6 +37,26 @@ export default function EditMemberForm({
         disabled={!canManage}
       />
       <Field label="Gender" name="gender" type="text" defaultValue={member.gender ?? ""} disabled={!canManage} />
+
+      <div className="space-y-1">
+        <label htmlFor="marital_status" className="text-sm font-medium text-neutral-700">
+          Marital status
+        </label>
+        <select
+          id="marital_status"
+          name="marital_status"
+          defaultValue={member.marital_status ?? ""}
+          disabled={!canManage}
+          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand disabled:bg-neutral-100"
+        >
+          <option value="">Not specified</option>
+          <option value="single">Single</option>
+          <option value="married">Married</option>
+          <option value="widowed">Widowed</option>
+          <option value="divorced">Divorced</option>
+        </select>
+      </div>
+
       <Field
         label="Birthday"
         name="birthday"
@@ -95,6 +115,20 @@ export default function EditMemberForm({
           <option value="transferred">Transferred</option>
           <option value="inactive">Inactive (deactivated)</option>
         </select>
+      </div>
+
+      <div className="space-y-1">
+        <label htmlFor="status_reason" className="text-sm font-medium text-neutral-700">
+          Reason (for Transferred / Inactive — e.g. relocation, reassigned to a different department)
+        </label>
+        <textarea
+          id="status_reason"
+          name="status_reason"
+          rows={2}
+          defaultValue={member.status_reason ?? ""}
+          disabled={!canManage}
+          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand disabled:bg-neutral-100"
+        />
       </div>
 
       {state?.error && <Alert tone="error">{state.error}</Alert>}

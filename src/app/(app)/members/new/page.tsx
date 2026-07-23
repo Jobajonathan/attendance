@@ -19,6 +19,25 @@ export default function NewMemberPage() {
         <Field label="Phone number" name="phone_number" type="tel" />
         <Field label="Occupation" name="occupation" type="text" />
         <Field label="Gender" name="gender" type="text" />
+
+        <div className="space-y-1">
+          <label htmlFor="marital_status" className="text-sm font-medium text-neutral-700">
+            Marital status
+          </label>
+          <select
+            id="marital_status"
+            name="marital_status"
+            defaultValue=""
+            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+          >
+            <option value="">Not specified</option>
+            <option value="single">Single</option>
+            <option value="married">Married</option>
+            <option value="widowed">Widowed</option>
+            <option value="divorced">Divorced</option>
+          </select>
+        </div>
+
         <Field label="Join date" name="join_date" type="date" />
         <Field label="Birthday" name="birthday" type="date" />
         <Field label="Wedding anniversary" name="anniversary_date" type="date" />
