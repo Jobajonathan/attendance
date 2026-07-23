@@ -127,6 +127,129 @@ export type Database = {
           },
         ]
       }
+      follow_up_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          assignee_name: string
+          assignee_phone: string | null
+          completed_at: string | null
+          feedback_note: string | null
+          id: string
+          member_id: string
+          status: string
+          token: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          assignee_name: string
+          assignee_phone?: string | null
+          completed_at?: string | null
+          feedback_note?: string | null
+          id?: string
+          member_id: string
+          status?: string
+          token?: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          assignee_name?: string
+          assignee_phone?: string | null
+          completed_at?: string | null
+          feedback_note?: string | null
+          id?: string
+          member_id?: string
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follow_up_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_up_assignments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_registration_requests: {
+        Row: {
+          anniversary_date: string | null
+          birthday: string | null
+          gender: string | null
+          id: string
+          join_reason: string | null
+          marital_status: string | null
+          name: string
+          occupation: string | null
+          phone_number: string | null
+          registration_link_id: string | null
+          residential_address: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string
+        }
+        Insert: {
+          anniversary_date?: string | null
+          birthday?: string | null
+          gender?: string | null
+          id?: string
+          join_reason?: string | null
+          marital_status?: string | null
+          name: string
+          occupation?: string | null
+          phone_number?: string | null
+          registration_link_id?: string | null
+          residential_address?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+        }
+        Update: {
+          anniversary_date?: string | null
+          birthday?: string | null
+          gender?: string | null
+          id?: string
+          join_reason?: string | null
+          marital_status?: string | null
+          name?: string
+          occupation?: string | null
+          phone_number?: string | null
+          registration_link_id?: string | null
+          residential_address?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_registration_requests_registration_link_id_fkey"
+            columns: ["registration_link_id"]
+            isOneToOne: false
+            referencedRelation: "registration_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_registration_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       members: {
         Row: {
           anniversary_date: string | null
@@ -230,6 +353,38 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      registration_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registration_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_templates: {
         Row: {
@@ -354,6 +509,13 @@ export type Database = {
           type: Database["public"]["Enums"]["activity_type"]
         }[]
       }
+      get_follow_up_assignment: {
+        Args: { p_token: string }
+        Returns: {
+          member_name: string
+          status: string
+        }[]
+      }
       get_monthly_attendance: {
         Args: { p_months?: number }
         Returns: {
@@ -386,6 +548,12 @@ export type Database = {
         Returns: {
           link_token: string
           title: string
+        }[]
+      }
+      get_registration_link: {
+        Args: { p_token: string }
+        Returns: {
+          is_active: boolean
         }[]
       }
       get_review_activity: {
@@ -444,6 +612,12 @@ export type Database = {
           submitted_at: string
         }[]
       }
+      submit_follow_up_feedback: {
+        Args: { p_feedback_note?: string; p_token: string }
+        Returns: {
+          outcome: string
+        }[]
+      }
       submit_message_review: {
         Args: {
           p_confirmed: boolean
@@ -457,6 +631,23 @@ export type Database = {
           outcome: string
           submission_status: Database["public"]["Enums"]["submission_status"]
           submitted_at: string
+        }[]
+      }
+      submit_registration_request: {
+        Args: {
+          p_anniversary_date?: string
+          p_birthday?: string
+          p_gender?: string
+          p_join_reason?: string
+          p_marital_status?: string
+          p_name: string
+          p_occupation?: string
+          p_phone_number?: string
+          p_residential_address?: string
+          p_token: string
+        }
+        Returns: {
+          outcome: string
         }[]
       }
       sync_activity_statuses: { Args: never; Returns: undefined }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireProfile } from "@/lib/current-profile";
-import { ROLE_LABELS, isLeadershipRole, canManageOperations } from "@/lib/roles";
+import { ROLE_LABELS, isLeadershipRole, canManageOperations, homePathForRole } from "@/lib/roles";
 import { Logo } from "@/components/logo";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -13,11 +13,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <header className="border-b border-neutral-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-6">
-            <Logo />
+            <Link href={homePathForRole(profile.role)}>
+              <Logo />
+            </Link>
             <nav className="flex gap-4 text-sm">
               {leadership && (
                 <Link href="/dashboard" className="text-neutral-600 hover:text-brand">
                   Dashboard
+                </Link>
+              )}
+              {leadership && (
+                <Link href="/analytics" className="text-neutral-600 hover:text-brand">
+                  Analytics
                 </Link>
               )}
               <Link href="/activities" className="text-neutral-600 hover:text-brand">
