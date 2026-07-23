@@ -56,7 +56,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
     notFound();
   }
 
-  const [{ data: submissions }, { data: auditEntries }] = await Promise.all([
+  const [{ data: submissions }, { data: auditEntries }, { count: activeMemberCount }] = await Promise.all([
     supabase
       .from("submissions")
       .select("*, members(name)")
@@ -68,6 +68,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
       .eq("entity_type", "activity")
       .eq("entity_id", id)
       .order("created_at", { ascending: false }),
+    supabase.from("members").select("*", { count: "exact", head: true }).or("status_manual.is.null,status_manual.eq.active"),
   ]);
 
   const headerList = await headers();
@@ -78,8 +79,13 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
   const canReopen = isLeadershipRole(profile.role);
   const canEdit = canManageOperations(profile.role);
 
+  // Real-time count, not just submitted rows: "absent" rows only exist once
+  // close_activity has run, so before then this is derived as
+  // active members - present - excused, matching what close_activity will
+  // eventually write rather than under-counting absences while still open.
   const presentCount = submissions?.filter((s) => s.status === "present").length ?? 0;
-  const absentCount = submissions?.filter((s) => s.status === "absent").length ?? 0;
+  const excusedCount = submissions?.filter((s) => s.status === "excused").length ?? 0;
+  const absentCount = Math.max((activeMemberCount ?? 0) - presentCount - excusedCount, 0);
 
   return (
     <div>
@@ -116,7 +122,9 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
       </div>
 
       <h2 className="font-heading mt-8 text-lg font-semibold text-neutral-900">
-        Roster {submissions ? `(${presentCount} present, ${absentCount} absent)` : ""}
+        Roster{" "}
+        {submissions &&
+          `(${presentCount} present, ${absentCount} absent${excusedCount ? `, ${excusedCount} excused` : ""})`}
       </h2>
       <Card className="mt-2 overflow-hidden">
         <table className="min-w-full divide-y divide-neutral-200 text-sm">

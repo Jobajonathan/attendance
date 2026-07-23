@@ -297,6 +297,15 @@ export type Database = {
           type: Database["public"]["Enums"]["activity_type"]
         }[]
       }
+      get_monthly_attendance: {
+        Args: { p_months?: number }
+        Returns: {
+          active_member_count: number
+          activity_count: number
+          month_start: string
+          present_count: number
+        }[]
+      }
       get_needs_follow_up: {
         Args: { p_threshold?: number }
         Returns: {
@@ -405,7 +414,12 @@ export type Database = {
         | "minister_in_charge"
         | "super_admin"
       geofence_outcome: "match" | "mismatch" | "unknown"
-      member_status_manual: "active" | "transferred" | "inactive"
+      member_status_manual:
+        | "active"
+        | "relocated"
+        | "suspended"
+        | "out_of_town"
+        | "other"
       submission_status: "present" | "absent" | "excused"
     }
     CompositeTypes: {
@@ -544,7 +558,13 @@ export const Constants = {
         "super_admin",
       ],
       geofence_outcome: ["match", "mismatch", "unknown"],
-      member_status_manual: ["active", "transferred", "inactive"],
+      member_status_manual: [
+        "active",
+        "relocated",
+        "suspended",
+        "out_of_town",
+        "other",
+      ],
       submission_status: ["present", "absent", "excused"],
     },
   },
