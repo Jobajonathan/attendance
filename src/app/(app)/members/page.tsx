@@ -32,6 +32,12 @@ export default async function MembersPage({
   const { data: members, error } = await query;
 
   const canManage = canManageOperations(profile.role);
+  const { count: pendingRequestCount } = canManage
+    ? await supabase
+        .from("member_registration_requests")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending")
+    : { count: null };
 
   return (
     <div>
@@ -40,6 +46,9 @@ export default async function MembersPage({
         action={
           canManage && (
             <div className="flex gap-2">
+              <LinkButton href="/members/requests" variant="secondary" size="sm">
+                Registration Requests{pendingRequestCount ? ` (${pendingRequestCount})` : ""}
+              </LinkButton>
               <LinkButton href="/members/import" variant="secondary" size="sm">
                 Import from Google Sheets
               </LinkButton>
