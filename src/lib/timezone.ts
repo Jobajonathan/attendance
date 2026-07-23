@@ -15,3 +15,19 @@ export function utcIsoToDatetimeLocal(iso: string): string {
   const watMs = new Date(iso).getTime() + 60 * 60 * 1000;
   return new Date(watMs).toISOString().slice(0, 16);
 }
+
+/** Today's date in WAT, normalized to local midnight (for date-only comparisons). */
+export function todayInWat(): Date {
+  const nowWat = new Date(Date.now() + 60 * 60 * 1000);
+  return new Date(Date.UTC(nowWat.getUTCFullYear(), nowWat.getUTCMonth(), nowWat.getUTCDate()));
+}
+
+/** "YYYY-MM-DD" for a Date already normalized via todayInWat(). */
+export function dateToWatDateString(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+/** Adds `days` calendar days to a WAT-normalized Date (see todayInWat()). */
+export function addDaysWat(date: Date, days: number): Date {
+  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+}

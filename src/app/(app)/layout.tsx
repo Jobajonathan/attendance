@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { requireProfile } from "@/lib/current-profile";
-import { ROLE_LABELS, isLeadershipRole, homePathForRole } from "@/lib/roles";
+import { ROLE_LABELS, isLeadershipRole, canManageOperations, homePathForRole } from "@/lib/roles";
 import { Logo } from "@/components/logo";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireProfile();
   const leadership = isLeadershipRole(profile.role);
+  const canManage = canManageOperations(profile.role);
 
   return (
     <div className="flex min-h-screen flex-1 flex-col bg-neutral-50">
@@ -35,6 +36,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               {leadership && (
                 <Link href="/staff" className="text-neutral-600 hover:text-brand">
                   Staff
+                </Link>
+              )}
+              {canManage && (
+                <Link href="/settings/services" className="text-neutral-600 hover:text-brand">
+                  Weekly Services
                 </Link>
               )}
             </nav>
