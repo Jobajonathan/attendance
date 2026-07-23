@@ -12,10 +12,11 @@ export const MEMBER_STATUS_LABELS: Record<MemberStatus, string> = {
 /**
  * Derives a member's effective status (FR-MEM-03, User Story MEM-2).
  *
- * Phase 1 only has status_manual to work from. "On Leave" (derived from an open
- * Leave record, Phase 3) and inactivity-threshold-driven "Inactive" (Phase 6,
- * Section 3.7) are not yet computable and are deliberately left as later inputs
- * to this same function rather than columns on the members table itself.
+ * "On Leave" is derived from an open Leave record — it's blocked on the Leave
+ * Register (Phase 3), which doesn't exist yet, not deferred by design. "Inactive"
+ * here only ever reflects a manual status_manual override; there is no automatic
+ * inactivity-threshold detection in this function (the Dashboard's Needs Follow
+ * Up list computes that separately, from consecutive absences).
  */
 export function deriveMemberStatus(member: Pick<Tables<"members">, "status_manual">): MemberStatus {
   if (member.status_manual === "transferred") return "transferred";

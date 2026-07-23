@@ -7,6 +7,10 @@ export const ROLE_LABELS: Record<AppRole, string> = {
   head_of_department: "Head of Department",
   assistant_head_of_department: "Assistant Head of Department",
   minister_in_charge: "Minister in Charge",
+  // Added alongside the super_admin DB enum value (PR: super admin role).
+  // LEADERSHIP_ROLES/isLeadershipRole are intentionally left unchanged here —
+  // wiring super_admin into permission checks is that PR's scope, not this one's.
+  super_admin: "Super Admin",
 };
 
 // Section 2.11 / 6.2: leadership roles land on the Dashboard; the Administrative
