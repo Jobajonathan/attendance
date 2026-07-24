@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ShareableLink } from "@/components/shareable-link";
 import { MarkContactedButton } from "./mark-contacted-button";
 import { AssignFollowUpForm } from "./assign-followup-form";
 import type { Database } from "@/lib/supabase/database.types";
@@ -57,9 +58,10 @@ export function NeedsFollowUpTable({
                         </Badge>
                       </div>
                       {assignment.status !== "done" && canContact && (
-                        <a href={assignment.url} className="block break-all text-xs text-brand underline">
-                          {assignment.url}
-                        </a>
+                        // Not shortened like other links — the full unguessable
+                        // token is the only thing keeping this private, since
+                        // it's meant to be shared with one specific person.
+                        <ShareableLink url={assignment.url} label={`Follow up: ${row.member_name}`} className="text-xs" />
                       )}
                     </div>
                   ) : canContact ? (

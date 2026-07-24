@@ -3,10 +3,12 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
 import { canManageOperations, isLeadershipRole } from "@/lib/roles";
+import { getOrCreateShortLink } from "@/lib/short-link";
 import { CloseActivityButton, ReopenActivityButton } from "./activity-actions";
 import { Card } from "@/components/ui/card";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
+import { ShareableLink } from "@/components/shareable-link";
 
 const ACTIVITY_STATUS_TONE: Record<string, BadgeTone> = {
   scheduled: "neutral",
@@ -74,7 +76,10 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
   const headerList = await headers();
   const origin = `${headerList.get("x-forwarded-proto") ?? "https"}://${headerList.get("host")}`;
   const isReview = activity.type === "message_review";
-  const submissionUrl = `${origin}/${isReview ? "review" : "checkin"}/${activity.link_token}`;
+  const submissionPath = `/${isReview ? "review" : "checkin"}/${activity.link_token}`;
+  const shortCode =
+    activity.status !== "closed" ? await getOrCreateShortLink(supabase, submissionPath) : null;
+  const submissionUrl = shortCode ? `${origin}/s/${shortCode}` : `${origin}${submissionPath}`;
   const canClose = canManageOperations(profile.role) || isLeadershipRole(profile.role);
   const canReopen = isLeadershipRole(profile.role);
   const canEdit = canManageOperations(profile.role);
@@ -105,9 +110,10 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
           <p className="text-sm font-medium text-neutral-700">
             {isReview ? "Review" : "Check-in"} keyword: {activity.keyword}
           </p>
-          <p className="mt-1 break-all text-sm text-neutral-600">
-            Link: <a href={submissionUrl} className="text-brand underline">{submissionUrl}</a>
-          </p>
+          <div className="mt-1 flex items-center gap-1 text-sm text-neutral-600">
+            <span>Link:</span>
+            <ShareableLink url={submissionUrl} label={activity.title} />
+          </div>
         </Card>
       )}
 

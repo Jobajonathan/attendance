@@ -21,6 +21,7 @@ export type Database = {
           created_by: string | null
           geofence_radius_m: number | null
           id: string
+          is_archived: boolean
           is_backfilled: boolean
           keyword: string
           keyword_no_location: string | null
@@ -40,6 +41,7 @@ export type Database = {
           created_by?: string | null
           geofence_radius_m?: number | null
           id?: string
+          is_archived?: boolean
           is_backfilled?: boolean
           keyword: string
           keyword_no_location?: string | null
@@ -59,6 +61,7 @@ export type Database = {
           created_by?: string | null
           geofence_radius_m?: number | null
           id?: string
+          is_archived?: boolean
           is_backfilled?: boolean
           keyword?: string
           keyword_no_location?: string | null
@@ -433,6 +436,24 @@ export type Database = {
           },
         ]
       }
+      short_links: {
+        Row: {
+          code: string
+          created_at: string
+          target_path: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          target_path: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          target_path?: string
+        }
+        Relationships: []
+      }
       submissions: {
         Row: {
           activity_id: string
@@ -566,6 +587,12 @@ export type Database = {
           status: Database["public"]["Enums"]["activity_status"]
           title: string
           type: Database["public"]["Enums"]["activity_type"]
+        }[]
+      }
+      get_short_link: {
+        Args: { p_code: string }
+        Returns: {
+          target_path: string
         }[]
       }
       get_weekly_engagement_components: {

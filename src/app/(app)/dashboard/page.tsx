@@ -4,12 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
 import { isLeadershipRole } from "@/lib/roles";
 import { buildCelebrations, type CelebrationType } from "@/lib/celebrations";
-import { computeEngagement, type WeeklyEngagementRow } from "@/lib/engagement";
+import { computeEngagement, type WeeklyEngagementRow, type MonthlyAttendanceRow } from "@/lib/engagement";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { EngagementTrend } from "./engagement-trend";
 import { NeedsFollowUpTable, type FollowUpAssignment } from "./needs-follow-up-table";
+import { MonthlyChart } from "./monthly-chart";
 
 const CELEBRATION_LABEL: Record<CelebrationType, string> = {
   birthday: "Birthday",
@@ -53,6 +54,8 @@ export default async function DashboardPage() {
     { data: weeklyRows },
     { data: followUpRows },
     { data: assignmentRows },
+    { data: monthlyRows },
+    { data: lastService },
   ] = await Promise.all([
     supabase.from("activities").select("id, title").eq("type", "attendance").eq("scheduled_date", todayStr),
     supabase.from("members").select("*", { count: "exact", head: true }).eq("status_manual", "suspended"),
@@ -64,6 +67,15 @@ export default async function DashboardPage() {
       .from("follow_up_assignments")
       .select("member_id, assignee_name, status, token, assigned_at")
       .order("assigned_at", { ascending: false }),
+    supabase.rpc("get_monthly_attendance", { p_months: 12 }),
+    supabase
+      .from("activities")
+      .select("id, title, scheduled_date")
+      .eq("type", "attendance")
+      .eq("status", "closed")
+      .order("scheduled_date", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   const headerList = await headers();
@@ -94,6 +106,18 @@ export default async function DashboardPage() {
     excusedCount = todaysSubmissions?.filter((s) => s.status === "excused").length ?? 0;
   }
   const absentCount = Math.max((activeMemberCount ?? 0) - presentCount - excusedCount, 0);
+
+  let lastServicePresent = 0;
+  let lastServiceExcused = 0;
+  if (lastService) {
+    const { data: lastServiceSubmissions } = await supabase
+      .from("submissions")
+      .select("status")
+      .eq("activity_id", lastService.id);
+    lastServicePresent = lastServiceSubmissions?.filter((s) => s.status === "present").length ?? 0;
+    lastServiceExcused = lastServiceSubmissions?.filter((s) => s.status === "excused").length ?? 0;
+  }
+  const lastServiceAbsent = Math.max((activeMemberCount ?? 0) - lastServicePresent - lastServiceExcused, 0);
 
   const celebrations = buildCelebrations(celebrationMembers ?? [], today);
   const weekly = (weeklyRows ?? []) as WeeklyEngagementRow[];
@@ -141,6 +165,28 @@ export default async function DashboardPage() {
           <p className="mt-2 text-2xl font-semibold text-neutral-900">{celebrations.length}</p>
         </Card>
       </div>
+
+      <h2 className="font-heading mt-6 text-lg font-semibold text-neutral-900">Last Service</h2>
+      <Card className="mt-2 p-4">
+        {lastService ? (
+          <>
+            <p className="text-sm font-medium text-neutral-700">
+              <Link href={`/activities/${lastService.id}`} className="text-brand underline">
+                {lastService.title}
+              </Link>{" "}
+              &middot; {lastService.scheduled_date}
+            </p>
+            <p className="mt-1 text-sm text-neutral-600">
+              {lastServicePresent} present &middot; {lastServiceAbsent} absent &middot; {lastServiceExcused} excused
+            </p>
+          </>
+        ) : (
+          <p className="text-sm text-neutral-400">No closed attendance activity yet.</p>
+        )}
+      </Card>
+
+      <h2 className="font-heading mt-6 text-lg font-semibold text-neutral-900">Monthly Attendance</h2>
+      <MonthlyChart rows={(monthlyRows ?? []) as MonthlyAttendanceRow[]} />
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
         <h2 className="font-heading text-lg font-semibold text-neutral-900">Engagement</h2>

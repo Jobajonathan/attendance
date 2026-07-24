@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/current-profile";
@@ -26,6 +27,9 @@ export default async function ServiceTemplatesPage() {
 
   return (
     <div>
+      <Link href="/activities" className="text-sm text-brand underline">
+        ← Back to Activities
+      </Link>
       <PageHeader
         title="Weekly Services"
         description="These recurring services auto-create their activity each week when their window opens. Ad-hoc events (Holy Ghost Experience, IMC, etc.) are created directly from Activities — New Activity."
