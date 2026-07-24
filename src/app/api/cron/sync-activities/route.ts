@@ -25,8 +25,28 @@ export async function GET(request: Request) {
   }
 
   const created = await createDueServiceActivities(supabase);
+  const archived = await archiveClosedServiceActivities(supabase);
 
-  return NextResponse.json({ ok: true, created });
+  return NextResponse.json({ ok: true, created, archived });
+}
+
+// Recurring services generate a fresh activity every week, so once one closes
+// it's just clutter on the main Activities list — archive it so it drops off
+// that list automatically. The current month's "Weekly activities" summary on
+// the Activities page queries by date, not archive status, so this month's
+// history stays visible there regardless.
+async function archiveClosedServiceActivities(
+  supabase: ReturnType<typeof createClient<Database>>,
+): Promise<number> {
+  const { data, error } = await supabase
+    .from("activities")
+    .update({ is_archived: true })
+    .not("service_template_id", "is", null)
+    .eq("status", "closed")
+    .eq("is_archived", false)
+    .select("id");
+  if (error) return 0;
+  return data?.length ?? 0;
 }
 
 // Item 10/13: weekly recurring services (service_templates) auto-create their

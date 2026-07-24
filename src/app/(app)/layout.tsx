@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { requireProfile } from "@/lib/current-profile";
-import { ROLE_LABELS, isLeadershipRole, canManageOperations, homePathForRole } from "@/lib/roles";
+import { ROLE_LABELS, isLeadershipRole, homePathForRole } from "@/lib/roles";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserMenu } from "@/components/user-menu";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireProfile();
   const leadership = isLeadershipRole(profile.role);
-  const canManage = canManageOperations(profile.role);
 
   return (
     <div className="flex min-h-screen flex-1 flex-col bg-neutral-50">
@@ -23,11 +23,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                   Dashboard
                 </Link>
               )}
-              {leadership && (
-                <Link href="/analytics" className="text-neutral-600 hover:text-brand">
-                  Analytics
-                </Link>
-              )}
               <Link href="/activities" className="text-neutral-600 hover:text-brand">
                 Activities
               </Link>
@@ -39,23 +34,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                   Staff
                 </Link>
               )}
-              {canManage && (
-                <Link href="/settings/services" className="text-neutral-600 hover:text-brand">
-                  Weekly Services
-                </Link>
-              )}
             </nav>
           </div>
-          <div className="flex items-center gap-3 text-sm text-neutral-600">
+          <div className="flex items-center gap-3">
             <ThemeToggle />
-            <span>
-              {profile.full_name} &middot; {ROLE_LABELS[profile.role]}
-            </span>
-            <form action="/logout" method="post">
-              <button type="submit" className="text-neutral-500 hover:text-brand">
-                Sign out
-              </button>
-            </form>
+            <UserMenu fullName={profile.full_name} roleLabel={ROLE_LABELS[profile.role]} />
           </div>
         </div>
       </header>
